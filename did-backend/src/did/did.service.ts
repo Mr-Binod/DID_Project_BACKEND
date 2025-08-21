@@ -1,0 +1,299 @@
+import { Injectable, Inject } from '@nestjs/common';
+import { CreateDidDto } from './dto/create-did.dto';
+import { UpdateDidDto } from './dto/update-did.dto';
+import { CreatePvtKey } from './utils/CreatePvtkey';
+import { ethers } from 'ethers';
+import { ConfigService } from '@nestjs/config';
+import { EthrDID } from 'ethr-did';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import * as schema from '../database/schema';
+import { eq } from 'drizzle-orm';
+import { CreateVC } from './utils/CreateVC';
+import { verifyVC } from './utils/VerifyVC';
+import { CertificateService } from './certificate.service';
+import * as jwt from 'jsonwebtoken';
+import DidContractABI from '../abi/DidContract.json';
+import { PrivateKeyDto } from './dto/privateKey.dto';
+import { CreateKakaoAuthDto } from 'src/kakao-auth/dto/create-kakao-auth.dto';
+import { AdditionalInfoDto } from 'src/kakao-auth/dto/Additional-info.dto';
+import { CreateAdminDto } from 'src/admin/dto/create-admin.dto';
+import { CreateVcDTO } from 'src/admin/dto/create-vc.dto';
+import { VerifyVcDTO } from 'src/admin/dto/verify-vc.dto';
+
+@Injectable()
+export class DidService {
+
+  private provider : ethers.JsonRpcProvider;
+  private Userdid : EthrDID;
+  private Issuerdid : EthrDID;
+  private userPvtKey : string;
+  private issuerPvtKey : string;
+  private jwtSecretKey : string; // Uncomment this line
+  private DidContract : ethers.Contract;
+  private delay : (ms : number) => Promise<void>;
+
+
+  constructor(
+    // private readonly db: NodePgDatabase<typeof schema>,
+    private configService: ConfigService,
+    private readonly certificateService : CertificateService,
+    @Inject('DATABASE') private db: NodePgDatabase<typeof schema>,
+    
+  ){
+    this.jwtSecretKey = this.configService.get<string>('JWT_SECRET_KEY') as string;
+    this.provider = new ethers.JsonRpcProvider(this.configService.get<string>('RPC_URL'));
+    const PaymasterWallet = new ethers.Wallet(this.configService.get<string>('SEPOLIA_PAYMASTER_PVTKEY') as string, this.provider);
+    this.DidContract = new ethers.Contract(this.configService.get<string>('DID_CONTRACT_ADDRESS') as string, DidContractABI.abi, PaymasterWallet);
+      this.delay = (ms : number) => {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+  }
+ 
+
+  async CreateKakaoUser(_data : CreateKakaoAuthDto, additionalInfoDto : AdditionalInfoDto) {
+    const {id, nickname, profile_image} = _data;
+    const {userName, birthDate, address} = additionalInfoDto;
+    const pvtkey = CreatePvtKey({id})
+    const wallet : ethers.Wallet= new ethers.Wallet(pvtkey, this.provider);
+    const _address = wallet.address;
+
+    this.Userdid = new EthrDID({
+      identifier: _address,
+      privateKey: pvtkey,
+      chainNameOrId: 'sealium'
+    });
+
+    const didAddress = this.Userdid.did;
+    const HashWalletData = jwt.sign({address : _address, privateKey : pvtkey}, this.jwtSecretKey)
+    const SetWalletData = await this.DidContract.setWalletData(_address, HashWalletData);
+    await SetWalletData.wait();
+
+    await this.delay(5000)
+    // const HashUserDid = jwt.sign(this.Userdid, this.jwtSecretKey)
+    // const SetDidData = await this.DidContract.setDidData(didAddress, HashUserDid);
+    // await SetDidData.wait();
+
+    const ContractDidData = await this.DidContract.DidData(_address);
+    console.log(ContractDidData, 'contractdiddata')
+
+    const Data = await this.db.insert(schema.user).values({
+        userName : userName,
+        userId : id,
+        nickName : nickname,
+        birthDate : birthDate,
+        address,
+        imgPath : profile_image,
+        walletAddress : _address,
+        didAddress : this.Userdid.did,
+    }).returning()
+
+    console.log(Data, 'data')
+    return {state : 200, message : 'signup successful'}
+  }
+
+  async create(createDidDto: CreateDidDto) {
+    const {userId, userName, nickName, password, birthDate, address, imgPath } = createDidDto
+    const _data : PrivateKeyDto = {id : userId}
+    const pvtkey = CreatePvtKey(_data);
+    const wallet : ethers.Wallet= new ethers.Wallet(pvtkey, this.provider);
+    const _address = wallet.address;
+    this.userPvtKey = pvtkey;
+    
+    this.Userdid = new EthrDID({
+      identifier: _address,
+      privateKey: pvtkey,
+      chainNameOrId: 'sealium'
+    });
+
+    const didAddress = this.Userdid.did;
+
+    const HashWalletData = jwt.sign({userAddress : _address, userPvtKey : pvtkey}, this.jwtSecretKey)
+    const SetEoaData = await this.DidContract.setWalletData(_address, HashWalletData);
+    await SetEoaData.wait();
+
+    await this.delay(5000)
+    const setDidData = await this.DidContract.setDidData(didAddress, HashWalletData);
+    await setDidData.wait();
+
+
+     const ContractDidData = await this.DidContract.WalletData(_address);
+    console.log(ContractDidData, 'contractdiddata')
+    
+    const decoded = jwt.verify(ContractDidData, this.jwtSecretKey)
+    // const events = await this.DidContract.on('EventSetWalletData', async(address, hashdata) => {
+    //   console.log(address, hashdata, 'events')
+    // })
+    console.log(decoded, 'decoded')
+    // const EoaData = await this.DidContract.WalletData(wallet.address);
+
+    const Data = await this.db.insert(schema.user).values({
+        userName ,
+        userId ,
+        nickName ,
+        password,
+        birthDate : birthDate,
+        address,
+        imgPath : imgPath,
+        walletAddress : _address,
+        didAddress : didAddress,
+    }).returning()
+
+    console.log(Data, 'data11')
+    return {state : 200, message : 'signup successful', data : Data}
+  }
+
+  async createadmin(createDidDto: CreateDidDto) {
+  const {userId, userName, nickName, password, birthDate, address, imgPath } = createDidDto
+
+  const pvtkey : string = CreatePvtKey({id : userId});
+  const wallet : ethers.Wallet = new ethers.Wallet(pvtkey, this.provider);
+  const _address = wallet.address;
+  // this.issuerPvtKey = pvtkey;
+  
+  const Issuerdid = new EthrDID({
+    identifier: _address,
+    privateKey: pvtkey,
+    chainNameOrId: 'sealium'
+  });
+  // console.log('did', this.Issuerdid);
+
+  const HashWalletData = jwt.sign({adminAddress : _address , adminPvtKey : pvtkey}, this.jwtSecretKey)
+    // console.log(HashWalletData, 'hashwallet');
+
+    const SetEoaData = await this.DidContract.setWalletData(_address, HashWalletData);
+    const receipt = await SetEoaData.wait()
+    console.log(receipt.status, 'seteoadataadmin')
+        console.log(SetEoaData, 'seteoadataadmin')
+        console.log(_address, 'addressadmin')
+
+    const EoaData = await this.DidContract.WalletData(_address);
+    console.log(EoaData, 'eoadataadmin');
+    const Data = await this.db.insert(schema.user).values({
+        userName ,
+        userId ,
+        nickName ,
+        birthDate : birthDate,
+        address,
+        imgPath : imgPath,
+        walletAddress : _address,
+        didAddress : Issuerdid.did,
+    }).returning()
+
+    console.log(Data, 'data11')
+    return {state : 200, message : 'signup successful', data : Data}
+
+
+  }
+
+  // should be sent by admin
+  async createvc(createVcDto: CreateVcDTO) {
+
+    console.log(createVcDto, 'createvcDto')
+
+    const userdata = await this.db.select().from(schema.user).where(eq(schema.user.userId, createVcDto.userId));
+    const admindata = await this.db.select().from(schema.user).where(eq(schema.user.userId, createVcDto.issuerId));
+    console.log(userdata, 'userdata')
+
+    const userPublicKey = userdata[0].walletAddress;
+    const userWalletData : string = await this.DidContract.WalletData(userPublicKey);
+    const userData = jwt.verify(userWalletData, this.jwtSecretKey) as {userAddress : string, userPvtKey : string} ;
+    const userDid = new EthrDID({
+      identifier: userData.userAddress,
+      privateKey: userData.userPvtKey,
+      chainNameOrId: 'sealium'
+    });
+
+    
+    const issuerPublicKey = admindata[0].walletAddress;
+    const issuerWalletData : string = await this.DidContract.WalletData(issuerPublicKey);
+    const issuerData = jwt.verify(issuerWalletData, this.jwtSecretKey) as {adminAddress : string, adminPvtKey : string};
+    console.log(issuerData, 'issuerdata')
+    const issuerDid = new EthrDID({
+      identifier: issuerData.adminAddress,
+      privateKey: issuerData.adminPvtKey,
+      chainNameOrId: 'sealium'
+    })
+    await this.delay(5000)
+    console.log(userData.userAddress, userData.userPvtKey, issuerData.adminAddress, issuerData.adminPvtKey, 'asdf')
+    const VC = await CreateVC(createVcDto, userDid, issuerDid);
+    const HashVcData = jwt.sign({VC, issuerDidId : issuerDid.did}, this.jwtSecretKey);
+    const SetVcData = await this.DidContract.setVcData(userDid.did, createVcDto.certificateName, HashVcData);
+    await SetVcData.wait();
+
+    // const certificate = await this.certificateService.generateCertificate(VC);
+    // console.log(certificate, 'vc', VC);
+    // const result = await verifyVC(VC, userDid, issuerDid, userData.privateKey, issuerData.privateKey);
+    console.log(SetVcData, VC, 'resultvc');
+
+    return {state : 200, message : 'vc created'}
+  }
+
+  async verifyvc(verifyVcDTO : VerifyVcDTO) {
+    // const VC = await CreateVC(createVcDto.userdid, createVcDto.name, createVcDto.type, createVcDto.issuerdid);
+
+    const url = verifyVcDTO.urlLink;
+    const parts = url.split('/');
+
+    const didValue = parts[3]; // 'did:ethers:91283'
+    const categoryValue = parts[4]; // 'categoryname'
+
+    console.log(didValue);
+    console.log(categoryValue);
+
+    const HashVcData = await this.DidContract.VcData(didValue, categoryValue);
+    const decodedData = jwt.verify(HashVcData, this.jwtSecretKey) as {VC : string, issuerDidId : string};
+    
+    const issuerData = await this.DidContract.DidData(decodedData.issuerDidId);
+    const {adminAddress, adminPvtKey} = issuerData;
+
+    const userData = await this.DidContract.DidData(verifyVcDTO.userDidId);
+    const {userAddress, userPvtKey} = userData;
+
+    const verifiedVC = await verifyVC(HashVcData, verifyVcDTO.userDidId, decodedData.issuerDidId, userPvtKey, adminPvtKey);
+    return verifiedVC;
+  }
+
+  async getVC(userdidId : string, vcTitle : string) {
+    const VC = await this.DidContract.VcData(userdidId, vcTitle);
+    return VC;
+  }
+
+  async getUserdid(userId : string) {
+    const data = await this.db.select().from(schema.user).where(eq(schema.user.userId, userId));
+    console.log(data, 'data');
+    return data[0].didAddress;
+  }
+
+  async findAll() {
+    const allDids = await this.db.select().from(schema.dids);
+    return allDids;
+  }
+
+  // async findOne(id: number) {
+  //   const [did] = await this.db.select().from(schema.dids).where(eq(schema.dids.id, id));
+  //   return did;
+  // }
+
+  // async update(id: number, updateDidDto: UpdateDidDto) {
+  //   const [updatedDid] = await this.db
+  //     .update(schema.dids)
+  //     .set({
+  //       domain: updateDidDto.domain,
+  //       salt: updateDidDto.salt,
+  //       updatedAt: new Date(),
+  //     })
+  //     .where(eq(schema.dids.id, id))
+  //     .returning();
+    
+  //   return updatedDid;
+  // }
+
+  async remove(id: number) {
+    const [deletedDid] = await this.db
+      .delete(schema.dids)
+      .where(eq(schema.dids.id, id))
+      .returning();
+    
+    return deletedDid;
+  }
+}
