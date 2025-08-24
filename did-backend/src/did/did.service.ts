@@ -57,13 +57,13 @@ export class DidService {
     const wallet : ethers.Wallet= new ethers.Wallet(pvtkey, this.provider);
     const _address = wallet.address;
 
-    this.Userdid = new EthrDID({
+    const Userdid = new EthrDID({
       identifier: _address,
       privateKey: pvtkey,
       chainNameOrId: 'sealium'
     });
 
-    const didAddress = this.Userdid.did;
+    const didAddress = Userdid.did;
     const HashWalletData = jwt.sign({address : _address, privateKey : pvtkey}, this.jwtSecretKey)
     const SetWalletData = await this.DidContract.setWalletData(_address, HashWalletData);
     await SetWalletData.wait();
@@ -84,7 +84,7 @@ export class DidService {
         address,
         imgPath : profile_image,
         walletAddress : _address,
-        didAddress : this.Userdid.did,
+        didAddress : Userdid.did,
     }).returning()
 
     console.log(Data, 'data')
@@ -99,13 +99,13 @@ export class DidService {
     const _address = wallet.address;
     this.userPvtKey = pvtkey;
     
-    this.Userdid = new EthrDID({
+    const Userdid = new EthrDID({
       identifier: _address,
       privateKey: pvtkey,
       chainNameOrId: 'sealium'
     });
 
-    const didAddress = this.Userdid.did;
+    const didAddress = Userdid.did;
 
     const HashWalletData = jwt.sign({userAddress : _address, userPvtKey : pvtkey}, this.jwtSecretKey)
     const SetEoaData = await this.DidContract.setWalletData(_address, HashWalletData);
