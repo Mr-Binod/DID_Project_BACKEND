@@ -37,7 +37,7 @@ export class DidController {
     return this.didService.create(_data);
   }
 
-  @Post('admin/did')
+  @Post('admin')
   createadmin(@Body() _data: CreateDidDto) {
     return this.didService.createadmin(_data);
   }
@@ -50,12 +50,12 @@ export class DidController {
   }
 
 
-  @Post('createvc')
-  createvc(@Body() _data: CreateVcDTO) {
-    const vc = this.didService.createvc(_data);
+  // @Post('createvc')
+  // createvc(@Body() _data: CreateVcDTO) {
+  //   const vc = this.didService.createvc(_data);
 
-    return
-  }
+  //   return
+  // }
 
   @Get('view/:userId/:vcTitle')
   async viewCertificate(

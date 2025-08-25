@@ -6,7 +6,7 @@ export class AdditionalInfoDto {
     userName: string;
 
     @IsString()
-    birthDate: number;
+    birthDate: string;
 
     @IsString()
     address: string;

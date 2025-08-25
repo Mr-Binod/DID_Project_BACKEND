@@ -20,7 +20,7 @@ export class CreateDidDto {
     imgPath : string;
     
     @IsNumber()
-    birthDate : number;
+    birthDate : string;
 
 }
 

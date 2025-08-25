@@ -11,7 +11,7 @@ export class CreateVcDTO {
     certificateName : string;
 
     @IsString()
-    issueDate : number;
+    issueDate : string;
 
     @IsString()
     event : string;

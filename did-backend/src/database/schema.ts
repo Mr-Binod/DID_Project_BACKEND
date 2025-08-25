@@ -12,7 +12,7 @@ export const user = pgTable('user', {
   userId: varchar('userId', { length: 255 }).notNull().primaryKey(),
   nickName: varchar('nickName', { length: 255 }).notNull(),
   password: varchar('password', {length : 100}),
-  birthDate: integer('birthDate').notNull(),
+  birthDate: varchar('birthDate').notNull(),
   address: varchar('address', { length: 255 }).notNull(),
   imgPath: varchar('imgPath', { length: 255 }),
   walletAddress: varchar('walletAddress', {length: 255}).notNull(),

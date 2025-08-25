@@ -21,6 +21,7 @@ export class KakaoAuthController {
 
     return this.kakaoAuthService.create(loginAccessToken, additionalInfoDto);
   }
+  
 
   @Get('kakao/auth')
   @Redirect()
