@@ -47,7 +47,7 @@ describe('DidService', () => {
                 userId: 'admin7w12',
                 nickName: 'admin',
                 password: 'admin',
-                birthDate: 123123,
+                birthDate: '123123',
                 address: 'admin',
                 imgPath: 'admin',
                 
@@ -64,7 +64,7 @@ describe('DidService', () => {
                 userId: 'hey3w121',
                 nickName: 'test3',
                 password: 'test3',
-                birthDate: 123123,
+                birthDate: '123123',
                 address: 'test3',
                 imgPath: 'test3',
                 
@@ -109,7 +109,7 @@ describe('DidService', () => {
         }, 10000)
 
         it('should return userdid', async() => {
-            const data = await service.getUserdid('hey1')
+            const data = await service.getUser('hey1')
             console.log(data)
         })
 

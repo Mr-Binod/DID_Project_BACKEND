@@ -19,30 +19,36 @@ export class AdminService {
     this.jwtSecretKey = this.configService.get<string>('JWT_SECRET_KEY') as string;
   }
 
-  createvc(createVcDTO: CreateVcDTO) {
-    const userdata = this.db.select().from(schema.user).where(eq(schema.user.userId, createVcDTO.userId));
-    const issuerdata = this.db.select().from(schema.user).where(eq(schema.admin.adminId, createVcDTO.issuerId));
+  // createvc(createVcDTO: CreateVcDTO) {
+  //   const userdata = this.db.select().from(schema.user).where(eq(schema.user.userId, createVcDTO.userId));
+  //   const issuerdata = this.db.select().from(schema.user).where(eq(schema.admin.adminId, createVcDTO.issuerId));
 
-    console.log(userdata, issuerdata, 'userdata');
+  //   console.log(userdata, issuerdata, 'userdata');
 
-    // const userdidAddress = 
-    // const userdid = 
-    return 'This action adds a new admin';
-  }
+  //   // const userdidAddress = 
+  //   // const userdid = 
+  //   return 'This action adds a new admin';
+  // }
 
   findAll() {
-    return `This action returns all admin`;
+    const alladmins = this.db.select().from(schema.admin)
+    console.log(alladmins, 'alladmins');
+    return alladmins;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} admin`;
+  findOne(id: string) {
+    const admin = this.db.select().from(schema.admin).where(eq(schema.admin.adminId, id));
+    console.log(admin, 'adminfindone');
+    return admin;
   }
 
   update(id: number, updateAdminDto: UpdateAdminDto) {
     return `This action updates a #${id} admin`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} admin`;
+  remove(id: string) {
+    const admin = this.db.delete(schema.admin).where(eq(schema.admin.adminId, id));
+    console.log(admin, 'admindeleted');
+    return {state : 200, message : 'admin deleted'};
   }
 }

@@ -3,24 +3,37 @@ import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { CreateVcDTO } from './dto/create-vc.dto';
+import { DidService } from 'src/did/did.service';
+import { CreateDidDto } from 'src/did/dto/create-did.dto';
 
 @Controller('admin')
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly didService: DidService,
+    private readonly adminService: AdminService
+  ) {}
 
-  @Post('issuevc')
-  createvc(@Body() createVcDTO : CreateVcDTO) {
-    return this.adminService.createvc(createVcDTO);
+  @Post()
+  createadmin(@Body() _data: CreateDidDto) {
+    return this.didService.createadmin(_data);
   }
 
-  @Get()
+  @Post('request')
+  savetempadmin(@Body() _data: CreateAdminDto) {
+    return this.adminService.savetempadmin(_data);
+
+  }
+
+ 
+
+  @Get('admins')
   findAll() {
     return this.adminService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.adminService.findOne(+id);
+    return this.adminService.findOne(id);
   }
 
   @Patch(':id')
@@ -30,6 +43,6 @@ export class AdminController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.adminService.remove(+id);
+    return this.adminService.remove(id);
   }
 }

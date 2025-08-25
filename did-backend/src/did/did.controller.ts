@@ -18,42 +18,39 @@ export class DidController {
     private readonly certificateService: CertificateService
   ) { }
 
-  @Post('user/register')
-  @UseInterceptors(FileInterceptor('file', {
-    storage: multer.diskStorage({
-      destination: './uploads',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-        cb(null, `${file.fieldname}-${uniqueSuffix}`);
-      }
-    })
-  }))
-  create(
-    @UploadedFile() file: Express.Multer.File,
-    @Body() _data: CreateDidDto
-) {
-    _data.imgPath = `http://sealiumback.store/uploads/${file.filename}`;
-    console.log(_data, 'data');
-    return this.didService.create(_data);
-  }
-
-  @Post('admin')
-  createadmin(@Body() _data: CreateDidDto) {
-    return this.didService.createadmin(_data);
-  }
+//   @Post('user')
+//   @UseInterceptors(FileInterceptor('file', {
+//     storage: multer.diskStorage({
+//       destination: './uploads',
+//       filename: (req, file, cb) => {
+//         const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+//         cb(null, `${file.fieldname}-${uniqueSuffix}`);
+//       }
+//     })
+//   }))
+//   create(
+//     @UploadedFile() file: Express.Multer.File,
+//     @Body() _data: CreateDidDto
+// ) {
+//     _data.imgPath = `http://sealiumback.store/uploads/${file.filename}`;
+//     console.log(_data, 'data');
+//     return this.didService.create(_data);
+//   }
+  // @Post('admin')
+  // createadmin(@Body() _data: CreateDidDto) {
+  //   return this.didService.createadmin(_data);
+  // }
 
   @Post('verifyvc')
   verifyvc(
     @Body() _data: VerifyVcDTO
-) {
+  ) {
     return this.didService.verifyvc(_data);
   }
-
-
+  
   // @Post('createvc')
   // createvc(@Body() _data: CreateVcDTO) {
   //   const vc = this.didService.createvc(_data);
-
   //   return
   // }
 
@@ -63,7 +60,7 @@ export class DidController {
     @Param('vcTitle') vcTitle: string,
     @Res() res: Response,
   ) {
-    const userdidId : string = await this.didService.getUserdid(userId);
+    const userdidId : string = (await this.didService.getUser(userId)).didAddress;
     const VC = await this.didService.getVC(userdidId, vcTitle);
     const pdfBuffer = await this.certificateService.generateCertificate(VC);
     const filename = encodeURIComponent(`${name}_certificate.pdf`);

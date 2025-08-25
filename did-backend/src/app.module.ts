@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { KakaoAuthModule } from './kakao-auth/kakao-auth.module';
 import { AdminModule } from './admin/admin.module';
+import { ClientModule } from './client/client.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { AdminModule } from './admin/admin.module';
     DidModule,
     DatabaseModule,
     KakaoAuthModule,
-    AdminModule
+    AdminModule,
+    ClientModule,
   ],
   controllers: [AppController],
   providers: [AppService],

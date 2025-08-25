@@ -32,7 +32,6 @@ export class DidService {
   private DidContract : ethers.Contract;
   private delay : (ms : number) => Promise<void>;
 
-
   constructor(
     // private readonly db: NodePgDatabase<typeof schema>,
     private configService: ConfigService,
@@ -49,7 +48,6 @@ export class DidService {
         }
   }
  
-
   async CreateKakaoUser(_data : CreateKakaoAuthDto, additionalInfoDto : AdditionalInfoDto) {
     const {id, nickname, profile_image} = _data;
     const {userName, birthDate, address} = additionalInfoDto;
@@ -115,8 +113,7 @@ export class DidService {
     const setDidData = await this.DidContract.setDidData(didAddress, HashWalletData);
     await setDidData.wait();
 
-
-     const ContractDidData = await this.DidContract.WalletData(_address);
+    const ContractDidData = await this.DidContract.WalletData(_address);
     console.log(ContractDidData, 'contractdiddata')
     
     const decoded = jwt.verify(ContractDidData, this.jwtSecretKey)
@@ -162,9 +159,9 @@ export class DidService {
 
     const SetEoaData = await this.DidContract.setWalletData(_address, HashWalletData);
     const receipt = await SetEoaData.wait()
-    console.log(receipt.status, 'seteoadataadmin')
-        console.log(SetEoaData, 'seteoadataadmin')
-        console.log(_address, 'addressadmin')
+    // console.log(receipt.status, 'seteoadataadmin')
+    //     console.log(SetEoaData, 'seteoadataadmin')
+    //     console.log(_address, 'addressadmin')
 
     const EoaData = await this.DidContract.WalletData(_address);
     console.log(EoaData, 'eoadataadmin');
@@ -178,18 +175,21 @@ export class DidService {
         walletAddress : _address,
         didAddress : Issuerdid.did,
     }).returning()
-
     console.log(Data, 'data11')
     return {state : 200, message : 'signup successful', data : Data}
+  }
 
+  async savetempadmin(createAdminDto : CreateAdminDto) {
+    const {userId, userName, nickName, password, birthDate, address, imgPath } = createDidDto
+    const data = await this.db.insert(schema.admin).values({
+      
+    })
 
   }
 
   // should be sent by admin
   async createvc(createVcDto: CreateVcDTO) {
-
-    console.log(createVcDto, 'createvcDto')
-
+    // console.log(createVcDto, 'createvcDto')
     const userdata = await this.db.select().from(schema.user).where(eq(schema.user.userId, createVcDto.userId));
     const admindata = await this.db.select().from(schema.user).where(eq(schema.user.userId, createVcDto.issuerId));
     console.log(userdata, 'userdata')
@@ -202,7 +202,6 @@ export class DidService {
       privateKey: userData.userPvtKey,
       chainNameOrId: 'sealium'
     });
-
     
     const issuerPublicKey = admindata[0].walletAddress;
     const issuerWalletData : string = await this.DidContract.WalletData(issuerPublicKey);
@@ -224,21 +223,17 @@ export class DidService {
     // console.log(certificate, 'vc', VC);
     // const result = await verifyVC(VC, userDid, issuerDid, userData.privateKey, issuerData.privateKey);
     console.log(SetVcData, VC, 'resultvc');
-
     return {state : 200, message : 'vc created'}
   }
 
   async verifyvc(verifyVcDTO : VerifyVcDTO) {
     // const VC = await CreateVC(createVcDto.userdid, createVcDto.name, createVcDto.type, createVcDto.issuerdid);
-
     const url = verifyVcDTO.urlLink;
     const parts = url.split('/');
-
     const didValue = parts[3]; // 'did:ethers:91283'
     const categoryValue = parts[4]; // 'categoryname'
-
-    console.log(didValue);
-    console.log(categoryValue);
+    // console.log(didValue);
+    // console.log(categoryValue);
 
     const HashVcData = await this.DidContract.VcData(didValue, categoryValue);
     const decodedData = jwt.verify(HashVcData, this.jwtSecretKey) as {VC : string, issuerDidId : string};
@@ -258,10 +253,10 @@ export class DidService {
     return VC;
   }
 
-  async getUserdid(userId : string) {
+  async getUser(userId : string) {
     const data = await this.db.select().from(schema.user).where(eq(schema.user.userId, userId));
     console.log(data, 'data');
-    return data[0].didAddress;
+    return data[0];
   }
 
   async findAll() {
@@ -287,6 +282,13 @@ export class DidService {
     
   //   return updatedDid;
   // }
+
+  async removeVc(userId : string, vcTitle : string) {
+    const userinfo = await this.getUser(userId)
+    const removeVc = await this.DidContract.removeVc(userinfo.didAddress, vcTitle);
+    await removeVc.wait();
+    return {state : 200, message : 'vc removed'}
+  }
 
   async remove(id: number) {
     const [deletedDid] = await this.db

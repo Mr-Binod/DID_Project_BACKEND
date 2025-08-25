@@ -45,9 +45,10 @@ export const VCprovider = pgTable('vcprovider', {
   userId: varchar('userId', {length: 255}).notNull(),
   certificateName: varchar('certificateName', {length: 255}).notNull(),
   issueDate: integer('issueDate').notNull(),
-  event: varchar('event', {length: 255}).notNull(),
   description: varchar('description', {length: 255}).notNull(),
-
+  issuerId: varchar('issuerId', {length: 255}).notNull(),
+  event: varchar('event', {length: 255}).notNull(),
+  
 })
 
 export const UserVC = pgTable('uservc', {
