@@ -15,7 +15,7 @@ import * as schema from './schema';
           host: configService.get('DB_HOST'),
           port: configService.get('DB_PORT', 5432),
           user: configService.get('DB_USER'),
-          password: configService.get('DB_PASSWORD'),
+          password: configService.get('DB_PASSWORD') as string ,
           database: configService.get('DB_NAME'),
           ssl: false, // Disable SSL for local development
         });
