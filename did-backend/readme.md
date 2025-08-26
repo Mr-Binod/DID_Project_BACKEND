@@ -85,3 +85,5 @@ CLIENT_SECRET=zBgdqbb1PbXlZ5fY9nEoajjSgwBM5zt3
 REDIRECT_URL=http://localhost:4000/auth/kakao/callback
 LOGOUT_REDIRECT_URL=http://localhost:4000/auth/kakao/logout/callback
 TOKEN_URL=https://kauth.kakao.com/oauth/token
+
+eval "$(ssh-agent -s)"
