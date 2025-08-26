@@ -41,8 +41,10 @@ export class DidService {
   ){
     this.jwtSecretKey = this.configService.get<string>('JWT_SECRET_KEY') as string;
     this.provider = new ethers.JsonRpcProvider(this.configService.get<string>('RPC_URL'));
-    const PaymasterWallet = new ethers.Wallet(this.configService.get<string>('SEPOLIA_PAYMASTER_PVTKEY') as string, this.provider);
-    this.DidContract = new ethers.Contract(this.configService.get<string>('DID_CONTRACT_ADDRESS') as string, DidContractABI.abi, PaymasterWallet);
+    const paymasterPvtKey : string = this.configService.get<string>('SEPOLIA_PAYMASTER_PVTKEY') as string;
+    const DidContractAddress : string = this.configService.get<string>('DID_CONTRACT_ADDRESS') as string;
+    const PaymasterWallet = new ethers.Wallet(paymasterPvtKey, this.provider);
+    this.DidContract = new ethers.Contract(DidContractAddress, DidContractABI.abi, PaymasterWallet);
       this.delay = (ms : number) => {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
