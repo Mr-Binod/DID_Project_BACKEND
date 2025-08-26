@@ -27,7 +27,7 @@ export class ClientController {
   }))
   create(
     @UploadedFile() file: Express.Multer.File,
-    @Body() _data: CreateDidDto
+    @Body() _data: CreateClientDto
   ) {
     _data.imgPath = `http://sealiumback.store/uploads/${file.filename}`;
     console.log(_data, 'data');

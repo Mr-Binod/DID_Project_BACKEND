@@ -5,6 +5,7 @@ import { UpdateKakaoAuthDto } from './dto/update-kakao-auth.dto';
 import type { Response, Request } from 'express';
 import { log } from 'console';
 import { AdditionalInfoDto } from './dto/Additional-info.dto';
+import { url } from 'inspector';
 
 @Controller()
 export class KakaoAuthController {
@@ -22,7 +23,6 @@ export class KakaoAuthController {
     return this.kakaoAuthService.create(loginAccessToken, additionalInfoDto);
   }
   
-
   @Get('kakao/auth')
   @Redirect()
   kakaoAuth() {
@@ -41,6 +41,21 @@ export class KakaoAuthController {
       res.cookie('kakao_access_token', access_token, {httpOnly : true, maxAge : 10 * 60 * 60 * 1000})
 
       return {state : 200, message : 'kakao login success'}
+  }
+
+  @Get('kakao/logout')
+  @Redirect()
+  logout(){
+    return {url : this.kakaoAuthService.logout()}
+  }
+
+  @Get('/auth/kakao/logout/callback')
+  kakaoLogoutCallback(
+    @Res({passthrough : true}) res: Response
+  ){
+    res.clearCookie('login_access_token');
+    res.clearCookie('kakao_access_token');
+    return {state : 200, message : 'logout success'}
   }
 
   @Get(':id')
