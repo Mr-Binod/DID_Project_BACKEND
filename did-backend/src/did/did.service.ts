@@ -51,7 +51,7 @@ export class DidService {
   async CreateKakaoUser(_data : CreateKakaoAuthDto, additionalInfoDto : AdditionalInfoDto) {
     const {id, nickname, profile_image} = _data;
     const {userName, birthDate, address} = additionalInfoDto;
-    const pvtkey = CreatePvtKey({id})
+    const pvtkey : string = CreatePvtKey({id})
     const wallet : ethers.Wallet= new ethers.Wallet(pvtkey, this.provider);
     const _address = wallet.address;
 
