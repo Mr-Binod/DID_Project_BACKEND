@@ -114,7 +114,7 @@ export class DidService {
     await this.delay(5000)
     const setDidData = await this.DidContract.setDidData(didAddress, HashWalletData);
     await setDidData.wait();
-
+    console.log(setDidData, 'setdiddata')
     const ContractDidData = await this.DidContract.WalletData(_address);
     console.log(ContractDidData, 'contractdiddata')
     

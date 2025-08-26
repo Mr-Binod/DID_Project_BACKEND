@@ -16,10 +16,10 @@ export class KakaoAuthController {
     @Body() additionalInfoDto : AdditionalInfoDto,
     @Req() req: Request 
   ) {
-    console.log(req)
     const loginAccessToken : string = req.cookies['login_access_token'];
     const kakaoAccessToken : string = req.cookies['kakao_access_token'];
-
+    
+    console.log(loginAccessToken, kakaoAccessToken)
     return this.kakaoAuthService.create(loginAccessToken, additionalInfoDto);
   }
   
