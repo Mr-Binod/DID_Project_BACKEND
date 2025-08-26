@@ -6,6 +6,8 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../database/schema';
 import { eq } from 'drizzle-orm';
 import { ConfigService } from '@nestjs/config';
+import { Admin } from 'typeorm';
+import { AdminRequestDto } from './dto/admin-request.dto';
 
 @Injectable()
 export class AdminService {
@@ -30,6 +32,12 @@ export class AdminService {
   //   return 'This action adds a new admin';
   // }
 
+  async savetempadmin(adminRequestDto : AdminRequestDto){ 
+      // const {userId, userName, nickName, password, birthDate, phoneNumber, grade, imgPath } = adminRequestDto
+      const data = await this.db.insert(schema.adminRequest).values(adminRequestDto);
+      return {state : 200, message : 'admin request saved'};
+    }
+
   findAll() {
     const alladmins = this.db.select().from(schema.admin)
     console.log(alladmins, 'alladmins');
@@ -37,7 +45,7 @@ export class AdminService {
   }
 
   findOne(id: string) {
-    const admin = this.db.select().from(schema.admin).where(eq(schema.admin.adminId, id));
+    const admin = this.db.select().from(schema.admin).where(eq(schema.admin.userId, id));
     console.log(admin, 'adminfindone');
     return admin;
   }
@@ -47,7 +55,7 @@ export class AdminService {
   }
 
   remove(id: string) {
-    const admin = this.db.delete(schema.admin).where(eq(schema.admin.adminId, id));
+    const admin = this.db.delete(schema.admin).where(eq(schema.admin.userId, id));
     console.log(admin, 'admindeleted');
     return {state : 200, message : 'admin deleted'};
   }

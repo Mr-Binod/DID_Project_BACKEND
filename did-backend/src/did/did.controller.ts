@@ -36,6 +36,7 @@ export class DidController {
 //     console.log(_data, 'data');
 //     return this.didService.create(_data);
 //   }
+
   // @Post('admin')
   // createadmin(@Body() _data: CreateDidDto) {
   //   return this.didService.createadmin(_data);
@@ -78,8 +79,8 @@ export class DidController {
   //   return this.didService.update(+id, updateDidDto);
   // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.didService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.didService.remove(+id);
+  // }
 }

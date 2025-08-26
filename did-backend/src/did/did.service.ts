@@ -139,8 +139,8 @@ export class DidService {
     return {state : 200, message : 'signup successful', data : Data}
   }
 
-  async createadmin(createDidDto: CreateDidDto) {
-  const {userId, userName, nickName, password, birthDate, address, imgPath } = createDidDto
+  async createadmin(CreateAdminDto: CreateAdminDto) {
+  const {userId, userName, nickName, password, birthDate, phoneNumber, grade, imgPath } = CreateAdminDto
 
   const pvtkey : string = CreatePvtKey({id : userId});
   const wallet : ethers.Wallet = new ethers.Wallet(pvtkey, this.provider);
@@ -165,26 +165,13 @@ export class DidService {
 
     const EoaData = await this.DidContract.WalletData(_address);
     console.log(EoaData, 'eoadataadmin');
-    const Data = await this.db.insert(schema.user).values({
-        userName ,
-        userId ,
-        nickName ,
-        birthDate : birthDate,
-        address,
-        imgPath : imgPath,
+    const Data = await this.db.insert(schema.admin).values({
+        ...CreateAdminDto,
         walletAddress : _address,
         didAddress : Issuerdid.did,
     }).returning()
     console.log(Data, 'data11')
     return {state : 200, message : 'signup successful', data : Data}
-  }
-
-  async savetempadmin(createAdminDto : CreateAdminDto) {
-    const {userId, userName, nickName, password, birthDate, address, imgPath } = createDidDto
-    const data = await this.db.insert(schema.admin).values({
-      
-    })
-
   }
 
   // should be sent by admin
@@ -259,10 +246,18 @@ export class DidService {
     return data[0];
   }
 
-  async findAll() {
-    const allDids = await this.db.select().from(schema.dids);
-    return allDids;
+   async removeVc(userId : string, vcTitle : string) {
+    const userinfo = await this.getUser(userId)
+    const removeVc = await this.DidContract.removeVc(userinfo.didAddress, vcTitle);
+    await removeVc.wait();
+    return {state : 200, message : 'vc removed'}
   }
+
+
+  // async findAll() {
+  //   const allDids = await this.db.select().from(schema.dids);
+  //   return allDids;
+  // }
 
   // async findOne(id: number) {
   //   const [did] = await this.db.select().from(schema.dids).where(eq(schema.dids.id, id));
@@ -283,19 +278,13 @@ export class DidService {
   //   return updatedDid;
   // }
 
-  async removeVc(userId : string, vcTitle : string) {
-    const userinfo = await this.getUser(userId)
-    const removeVc = await this.DidContract.removeVc(userinfo.didAddress, vcTitle);
-    await removeVc.wait();
-    return {state : 200, message : 'vc removed'}
-  }
-
-  async remove(id: number) {
-    const [deletedDid] = await this.db
-      .delete(schema.dids)
-      .where(eq(schema.dids.id, id))
-      .returning();
+ 
+  // async remove(id: number) {
+  //   const [deletedDid] = await this.db
+  //     .delete(schema.dids)
+  //     .where(eq(schema.dids.id, id))
+  //     .returning();
     
-    return deletedDid;
-  }
+  //   return deletedDid;
+  // }
 }

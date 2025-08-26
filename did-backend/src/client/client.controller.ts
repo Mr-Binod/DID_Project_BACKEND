@@ -7,7 +7,7 @@ import multer from 'multer';
 import { CreateDidDto } from 'src/did/dto/create-did.dto';
 import { DidService } from 'src/did/did.service';
 import { CreateVcDTO } from 'src/admin/dto/create-vc.dto';
-
+import type { Express } from 'express';
 @Controller('user')
 export class ClientController {
   constructor(
