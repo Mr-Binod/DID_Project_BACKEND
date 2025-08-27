@@ -7,6 +7,7 @@ import { DidService } from 'src/did/did.service';
 import { CreateDidDto } from 'src/did/dto/create-did.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import multer from 'multer';
+import path from 'path';
 
 @Controller('admin')
 export class AdminController {
@@ -25,16 +26,20 @@ export class AdminController {
       storage: multer.diskStorage({
         destination: './uploads',
         filename: (req, file, cb) => {
-          const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-          cb(null, `${file.fieldname}-${uniqueSuffix}`);
-        }
-      })
+        const safeName = Buffer.from(file.originalname, "latin1").toString(
+          "utf8"
+        );
+        const parsed = path.parse(safeName);
+        cb(null, `${parsed.name}_${Date.now()}${parsed.ext}`);
+      },
+      }),
+      limits: { fileSize: 100 * 1024 * 1024 },
     }))
   savetempadmin(
     @UploadedFile() file: Express.Multer.File,
     @Body() _data: CreateAdminDto
   ) {
-    _data.imgPath = `http://sealiumback.store/uploads/${file.filename}`;
+    _data.imgPath = `https://sealiumback.store/uploads/${file.filename}`;
     return this.adminService.savetempadmin(_data);
   }
 
