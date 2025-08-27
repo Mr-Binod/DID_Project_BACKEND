@@ -25,7 +25,7 @@ export const user = pgTable('user', {
 export const admin = pgTable('admin', {
   id: serial('id').primaryKey(),
   userName: varchar('name', { length: 255 }).notNull(),
-  userId: varchar('email', { length: 255 }).notNull(),
+  userId: varchar('userId', { length: 255 }).notNull(),
   nickName: varchar('nickName', { length: 255 }).notNull(),
   password: varchar('password', {length : 100}),
   birthDate: varchar('birthDate', { length: 255 }).notNull(),
@@ -41,7 +41,7 @@ export const admin = pgTable('admin', {
 export const adminRequest = pgTable('adminRequest', {
   id : serial('id'),
   userName: varchar('name', { length: 255 }).notNull(),
-  userId: varchar('email', { length: 255 }).notNull().primaryKey(),
+  userId: varchar('userId', { length: 255 }).notNull().primaryKey(),
   password: varchar('password', {length : 100}),
   nickName: varchar('nickName', { length: 255 }),
   birthDate: varchar('birthDate').notNull(),
