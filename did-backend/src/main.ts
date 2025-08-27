@@ -15,7 +15,7 @@ async function bootstrap() {
 	  credentials : true
 	 }))
   app.use('/uploads', express.static(join(__dirname, '..','..', 'uploads')));
-  app.useGlobalPipes(new ValidationPipe());
+  // app.useGlobalPipes(new ValidationPipe());
   await app.listen(process.env.PORT ?? 4000);
 }
 bootstrap();
