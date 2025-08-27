@@ -178,7 +178,7 @@ export class DidService {
 
   // should be sent by admin
   async createvc(createVcDto: CreateVcDTO) {
-    // console.log(createVcDto, 'createvcDto')
+    console.log(createVcDto, 'createvcDto')
     const userdata = await this.db.select().from(schema.user).where(eq(schema.user.userId, createVcDto.userId));
     const admindata = await this.db.select().from(schema.user).where(eq(schema.user.userId, createVcDto.issuerId));
     console.log(userdata, 'userdata')

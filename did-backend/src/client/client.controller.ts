@@ -8,6 +8,8 @@ import { CreateDidDto } from 'src/did/dto/create-did.dto';
 import { DidService } from 'src/did/did.service';
 import { CreateVcDTO } from 'src/admin/dto/create-vc.dto';
 import type { Express } from 'express';
+import path from 'path';
+
 @Controller('user')
 export class ClientController {
   constructor(
@@ -16,26 +18,31 @@ export class ClientController {
   ) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('file', {
+   @UseInterceptors(FileInterceptor('file', {
     storage: multer.diskStorage({
       destination: './uploads',
       filename: (req, file, cb) => {
-        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-        cb(null, `${file.fieldname}-${uniqueSuffix}`);
-      }
-    })
+      const safeName = Buffer.from(file.originalname, "latin1").toString(
+        "utf8"
+      );
+      const parsed = path.parse(safeName);
+      cb(null, `${parsed.name}_${Date.now()}${parsed.ext}`);
+    },
+    }),
+    limits: { fileSize: 100 * 1024 * 1024 },
   }))
   create(
     @UploadedFile() file: Express.Multer.File,
     @Body() _data: CreateClientDto
   ) {
-    _data.imgPath = `http://sealiumback.store/uploads/${file.filename}`;
+    _data.imgPath = `https://sealiumback.store/uploads/${file.filename}`;
     console.log(_data, 'data');
     return this.didService.create(_data);
   }
 
   @Post('vc')
   createvc(@Body() createVcDTO : CreateVcDTO) {
+	  console.log(createVcDTO, ' createvc')
     return this.didService.createvc(createVcDTO);
   }
 
