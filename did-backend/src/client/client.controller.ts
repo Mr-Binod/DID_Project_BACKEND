@@ -9,7 +9,6 @@ import { DidService } from 'src/did/did.service';
 import { CreateVcDTO } from 'src/admin/dto/create-vc.dto';
 import type { Express } from 'express';
 import path from 'path';
-
 @Controller('user')
 export class ClientController {
   constructor(

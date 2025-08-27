@@ -46,7 +46,7 @@ export const adminRequest = pgTable('adminRequest', {
   nickName: varchar('nickName', { length: 255 }),
   birthDate: varchar('birthDate').notNull(),
   phoneNumber: varchar('phoneNumber', { length: 20 }).notNull(),
-  grade: integer('grade').notNull(),
+  grade: integer('grade').notNull().default(0),
   imgPath: varchar('imgPath', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),

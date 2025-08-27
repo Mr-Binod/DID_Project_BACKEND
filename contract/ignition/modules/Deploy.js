@@ -11,4 +11,4 @@ const Deploy = async() => {
 Deploy().catch((error) => {
   console.error(error);
   process.exitCode = 1;
-});
+});  
