@@ -288,12 +288,11 @@ export class DidService {
     }
     const removeUser = await this.DidContract.removeUser(userinfo.walletAddress, userinfo.didAddress);
     await removeUser.wait();
-    await this.db.delete(schema.UserVC).where(eq(schema.UserVC.userId, userId));
     await this.db.delete(schema.user).where(eq(schema.user.userId, userId));
     return {state : 200, message : 'user removed'}
   }
 
-
+ 
 
   // async findAll() {
   //   const allDids = await this.db.select().from(schema.dids);

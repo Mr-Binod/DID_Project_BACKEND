@@ -8,9 +8,9 @@ import { id } from 'ethers';
 
 // Userinfo table
 export const user = pgTable('user', {
-  id: serial('id'),
+  id: serial('id').primaryKey(),
   userName: varchar('userName', { length: 255 }),
-  userId: varchar('userId', { length: 255 }).notNull().primaryKey(),
+  userId: varchar('userId', { length: 255 }).notNull().unique(),
   nickName: varchar('nickName', { length: 255 }).notNull(),
   password: varchar('password', {length : 100}),
   birthDate: varchar('birthDate').notNull(),
@@ -23,9 +23,9 @@ export const user = pgTable('user', {
 });
 
 export const admin = pgTable('admin', {
-  id: serial('id'),
+  id: serial('id').primaryKey(),
   userName: varchar('name', { length: 255 }).notNull(),
-  userId: varchar('userId', { length: 255 }).notNull().primaryKey(),
+  userId: varchar('userId', { length: 255 }).notNull().unique(),
   nickName: varchar('nickName', { length: 255 }).notNull(),
   password: varchar('password', {length : 100}),
   birthDate: varchar('birthDate', { length: 255 }).notNull(),
@@ -39,9 +39,9 @@ export const admin = pgTable('admin', {
 });
 
 export const adminRequest = pgTable('adminrequest', {
-  id : serial('id'),
+  id : serial('id').primaryKey(),
   userName: varchar('userName', { length: 255 }).notNull(),
-  userId: varchar('userId', { length: 255 }).notNull().primaryKey(),
+  userId: varchar('userId', { length: 255 }).notNull().unique(),
   password: varchar('password', {length : 100}),
   nickName: varchar('nickName', { length: 255 }),
   birthDate: varchar('birthDate').notNull(),
@@ -53,19 +53,20 @@ export const adminRequest = pgTable('adminrequest', {
 });
 
 export const VcLogs = pgTable('vclogs', {
-  id: serial('id'),
+  id: serial('id').primaryKey(),
   userName: varchar('userName', {length: 255}).notNull(),
-  userId: varchar('userId', {length: 255}).notNull(),
+  userId: varchar('userId', {length: 255}).notNull().references(() => user.userId, {onDelete : 'cascade'}),
   certificateName: varchar('certificateName', {length: 255}).notNull(),
   issueDate: integer('issueDate').notNull(),
   description: varchar('description', {length: 255}).notNull(),
   issuerId: varchar('issuerId', {length: 255}).notNull(),
-  event: varchar('event', {length: 255}).notNull(),
+  request: varchar('request', {length: 255}).notNull(),
+  status : varchar('status', {length: 255}).notNull().default('pending'),
 })
 
 export const UserVC = pgTable('uservc', {
-  id: serial('id'),
-  userId: varchar('userId', { length: 255 }).notNull(),
+  id: serial('id').primaryKey(),
+  userId: varchar('userId', { length: 255 }).notNull().references(() => user.userId, {onDelete : 'cascade'}),
   userDidId: varchar('userDidId', { length: 255 }).notNull(),
   issuerId: varchar('issuerId', { length: 255 }).notNull(),
   issuerDidId: varchar('issuerDidId', { length: 255 }).notNull(),
