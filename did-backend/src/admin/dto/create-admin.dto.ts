@@ -23,6 +23,6 @@ export class CreateAdminDto {
     @IsString()
     phoneNumber : string;
  
-    @IsNumber()
-    grade : number;
+    // @IsNumber()
+    // grade : number;
 }
