@@ -38,7 +38,7 @@ export const admin = pgTable('admin', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
-export const adminRequest = pgTable('adminrequest', {
+export const adminRequest = pgTable('admin_request', {
   id : serial('id').primaryKey(),
   userName: varchar('userName', { length: 255 }).notNull(),
   userId: varchar('userId', { length: 255 }).notNull().unique(),
@@ -52,25 +52,44 @@ export const adminRequest = pgTable('adminrequest', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
-export const VcLogs = pgTable('vclogs', {
+export const VcRequestLogs = pgTable('vc_request_logs', {
   id: serial('id').primaryKey(),
   userName: varchar('userName', {length: 255}).notNull(),
   userId: varchar('userId', {length: 255}).notNull().references(() => user.userId, {onDelete : 'cascade'}),
   certificateName: varchar('certificateName', {length: 255}).notNull(),
-  issueDate: integer('issueDate').notNull(),
+  requestDate: varchar('issueDate').notNull(),
   description: varchar('description', {length: 255}).notNull(),
-  issuerId: varchar('issuerId', {length: 255}).notNull(),
   request: varchar('request', {length: 255}).notNull(),
   status : varchar('status', {length: 255}).notNull().default('pending'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 })
 
-export const UserVC = pgTable('uservc', {
+export const VcConfirmedLogs = pgTable('vc_confirmed_logs', {
+  id: serial('id').primaryKey(),
+  userName: varchar('userName', {length: 255}).notNull(),
+  userId: varchar('userId', {length: 255}).notNull().references(() => user.userId, {onDelete : 'cascade'}),
+  certificateName: varchar('certificateName', {length: 255}).notNull(),
+  requestDate: varchar('issueDate').notNull(),
+  description: varchar('description', {length: 255}).notNull(),
+  request: varchar('request', {length: 255}).notNull(),
+  status : varchar('status', {length: 255}).notNull(),
+  issuerId: varchar('issuerId', {length: 255}).notNull(),
+  issueDate: varchar('issueDate').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
+
+export const UserVC = pgTable('user_vc', {
   id: serial('id').primaryKey(),
   userId: varchar('userId', { length: 255 }).notNull().references(() => user.userId, {onDelete : 'cascade'}),
   userDidId: varchar('userDidId', { length: 255 }).notNull(),
   issuerId: varchar('issuerId', { length: 255 }).notNull(),
   issuerDidId: varchar('issuerDidId', { length: 255 }).notNull(),
   certificateName: varchar('certificateName', { length: 255 }).notNull(),
+  requestDate : varchar('requestDate', { length: 255 }).notNull(),
+  issueDate : varchar('issueDate', { length: 255 }).notNull(),
+  status : varchar('status', { length: 255 }).notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 })

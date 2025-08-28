@@ -5,6 +5,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../database/schema';
 import { eq } from 'drizzle-orm';
 import { DidService } from 'src/did/did.service';
+import { CreateVcRequestDTO } from 'src/admin/dto/create-vc-request.dto';
 
 @Injectable()
 export class ClientService {
@@ -13,10 +14,11 @@ export class ClientService {
     @Inject('DATABASE') private db: NodePgDatabase<typeof schema>,
   ) {}
 
-  create(
-    createClientDto: CreateClientDto
+  async createVcRequest(
+    createVcRequestDTO: CreateVcRequestDTO
   ) {
-    return 'This action adds a new client';
+    const data = await this.db.insert(schema.VcRequestLogs).values(createVcRequestDTO).returning();
+    return {state : 200, message : 'VC request created', data};
   }
 
   async findAllUserVc(id : string) {

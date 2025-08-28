@@ -183,6 +183,9 @@ export class DidService {
     return {state : 200, message : 'signup successful', data : Data}
   }
 
+
+  
+
   // should be sent by admin
   async createvc(createVcDto: CreateVcDTO) {
     console.log(createVcDto, 'createvcDto')
@@ -216,12 +219,17 @@ export class DidService {
     const SetVcData = await this.DidContract.setVcData(userDid.did, createVcDto.certificateName, VC);
     await SetVcData.wait();
 
+    const VcConfirmedData = await this.db.insert(schema.VcConfirmedLogs).values(createVcDto).returning()
+
     const data = await this.db.insert(schema.UserVC).values({
       userId: createVcDto.userId,
       userDidId: userDid.did,
       issuerId: createVcDto.issuerId,
       issuerDidId: issuerDid.did,
       certificateName: createVcDto.certificateName,
+      requestDate: createVcDto.requestDate,
+      issueDate: createVcDto.issueDate,
+      status: createVcDto.status,
     }).returning()
 
     // const certificate = await this.certificateService.generateCertificate(VC);

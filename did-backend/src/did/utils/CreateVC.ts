@@ -8,7 +8,6 @@ import { CreateVcDTO } from "src/admin/dto/create-vc.dto";
 export const CreateVC = async (createVcDTO: CreateVcDTO, userDid: EthrDID, issuerDid: EthrDID) => {
     console.log(userDid, 'didcreate');
 
-    const {userName, certificateName, issueDate, event, description} = createVcDTO;
     const vcPayload = {
         sub: userDid.did,
         nbf: Math.floor(Date.now() / 1000),
@@ -19,11 +18,7 @@ export const CreateVC = async (createVcDTO: CreateVcDTO, userDid: EthrDID, issue
             type: ['VerifiableCredential', 'YourCustomType'],
             credentialSubject: {
                 userDid: userDid.did,
-                userName,
-                certificateName,
-                issueDate,
-                event,
-                description,
+                ...createVcDTO,
                 issuer: 'kyungilgameIT academy'
             }
         }

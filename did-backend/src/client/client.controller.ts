@@ -9,6 +9,7 @@ import { DidService } from 'src/did/did.service';
 import { CreateVcDTO } from 'src/admin/dto/create-vc.dto';
 import type { Express } from 'express';
 import path from 'path';
+import { CreateVcRequestDTO } from 'src/admin/dto/create-vc-request.dto';
 @Controller('user')
 export class ClientController {
   constructor(
@@ -39,7 +40,13 @@ export class ClientController {
     return this.didService.create(_data);
   }
 
-  @Post('vc')
+  @Post('vc/request')
+  createVcRequest(@Body() createVcRequestDTO : CreateVcRequestDTO) {
+	  console.log(createVcRequestDTO, ' createvc')
+    return this.clientService.createVcRequest(createVcRequestDTO);
+  }
+
+  @Post('vc/confirm')
   createvc(@Body() createVcDTO : CreateVcDTO) {
 	  console.log(createVcDTO, ' createvc')
     return this.didService.createvc(createVcDTO);

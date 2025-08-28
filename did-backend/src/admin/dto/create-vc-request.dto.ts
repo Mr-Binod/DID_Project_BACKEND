@@ -1,6 +1,6 @@
 import { IsString } from "class-validator";
 
-export class CreateVcDTO {
+export class CreateVcRequestDTO {
     @IsString()
     userName : string;
 
@@ -21,10 +21,4 @@ export class CreateVcDTO {
 
     @IsString()
     status : string;
-
-    @IsString()
-    issuerId : string;
-
-    @IsString()
-    issueDate : string;
 }
