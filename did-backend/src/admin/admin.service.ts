@@ -35,7 +35,7 @@ export class AdminService {
 
   async savetempadmin(adminRequestDto : AdminRequestDto){ 
       // const {userId, userName, nickName, password, birthDate, phoneNumber, grade, imgPath } = adminRequestDto
-      const data = await this.db.insert(schema.adminRequest).values(adminRequestDto).returning();
+      const data = await this.db.insert(schema.admin_request).values(adminRequestDto).returning();
       return {state : 200, message : 'admin request saved', data};
     }
 
@@ -49,7 +49,7 @@ export class AdminService {
   }
 
   async findOne(id: string) {
-    const admin = await this.db.select().from(schema.admin).leftJoin(schema.adminRequest, eq(schema.admin.userId, schema.adminRequest.userId)).where(eq(schema.admin.userId, id));
+    const admin = await this.db.select().from(schema.admin).leftJoin(schema.admin_request, eq(schema.admin.userId, schema.admin_request.userId)).where(eq(schema.admin.userId, id));
     console.log(admin, 'adminfindone');
     if(admin.length === 0){
       return {state : 404, message : 'no admin'};

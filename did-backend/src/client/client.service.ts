@@ -17,13 +17,13 @@ export class ClientService {
   async createVcRequest(
     createVcRequestDTO: CreateVcRequestDTO
   ) {
-    const data = await this.db.insert(schema.VcRequestLogs).values(createVcRequestDTO).returning();
+    const data = await this.db.insert(schema.vc_request_logs).values(createVcRequestDTO).returning();
     return {state : 200, message : 'VC request created', data};
   }
 
   async findAllUserVc(id : string) {
     // let uservc = []
-    const data = await this.db.select().from(schema.UserVC).where(eq(schema.UserVC.userId, id))
+    const data = await this.db.select().from(schema.user_vc).where(eq(schema.user_vc.userId, id))
     console.log(data, 'data')
     const VCdata = data.map(async (item) => {
       const VC = await this.didService.getVC(item.userDidId, item.certificateName)

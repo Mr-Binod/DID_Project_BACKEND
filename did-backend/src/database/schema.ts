@@ -38,7 +38,7 @@ export const admin = pgTable('admin', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
-export const adminRequest = pgTable('admin_request', {
+export const admin_request = pgTable('admin_request', {
   id : serial('id').primaryKey(),
   userName: varchar('userName', { length: 255 }).notNull(),
   userId: varchar('userId', { length: 255 }).notNull().unique(),
@@ -52,7 +52,7 @@ export const adminRequest = pgTable('admin_request', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
-export const VcRequestLogs = pgTable('vc_request_logs', {
+export const vc_request_logs = pgTable('vc_request_logs', {
   id: serial('id').primaryKey(),
   userName: varchar('userName', {length: 255}).notNull(),
   userId: varchar('userId', {length: 255}).notNull().references(() => user.userId, {onDelete : 'cascade'}),
@@ -65,7 +65,7 @@ export const VcRequestLogs = pgTable('vc_request_logs', {
   updatedAt: timestamp('updated_at').defaultNow(),
 })
 
-export const VcConfirmedLogs = pgTable('vc_confirmed_logs', {
+export const vc_confirmed_logs = pgTable('vc_confirmed_logs', {
   id: serial('id').primaryKey(),
   userName: varchar('userName', {length: 255}).notNull(),
   userId: varchar('userId', {length: 255}).notNull().references(() => user.userId, {onDelete : 'cascade'}),
@@ -80,7 +80,7 @@ export const VcConfirmedLogs = pgTable('vc_confirmed_logs', {
   updatedAt: timestamp('updated_at').defaultNow(),
 })
 
-export const UserVC = pgTable('user_vc', {
+export const user_vc = pgTable('user_vc', {
   id: serial('id').primaryKey(),
   userId: varchar('userId', { length: 255 }).notNull().references(() => user.userId, {onDelete : 'cascade'}),
   userDidId: varchar('userDidId', { length: 255 }).notNull(),
