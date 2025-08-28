@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { EthrDID } from 'ethr-did';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../database/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { CreateVC } from './utils/CreateVC';
 import { verifyVC } from './utils/VerifyVC';
 import { CertificateService } from './certificate.service';
@@ -70,8 +70,8 @@ export class DidService {
 
     await this.delay(5000)
     // const HashUserDid = jwt.sign(this.Userdid, this.jwtSecretKey)
-    // const SetDidData = await this.DidContract.setDidData(didAddress, HashUserDid);
-    // await SetDidData.wait();
+    const SetDidData = await this.DidContract.setDidData(didAddress, HashWalletData);
+    await SetDidData.wait();
 
     const ContractDidData = await this.DidContract.DidData(_address);
     console.log(ContractDidData, 'contractdiddata')
@@ -165,6 +165,10 @@ export class DidService {
     // console.log(receipt.status, 'seteoadataadmin')
     //     console.log(SetEoaData, 'seteoadataadmin')
     //     console.log(_address, 'addressadmin')
+    
+    const didAddress = Issuerdid.did
+    const setDidData = await this.DidContract.setDidData(didAddress, HashWalletData);
+    await setDidData.wait();
 
     const EoaData = await this.DidContract.WalletData(_address);
     console.log(EoaData, 'eoadataadmin');
@@ -181,7 +185,7 @@ export class DidService {
   async createvc(createVcDto: CreateVcDTO) {
     console.log(createVcDto, 'createvcDto')
     const userdata = await this.db.select().from(schema.user).where(eq(schema.user.userId, createVcDto.userId));
-    const admindata = await this.db.select().from(schema.user).where(eq(schema.user.userId, createVcDto.issuerId));
+    const admindata = await this.db.select().from(schema.admin).where(eq(schema.admin.userId, createVcDto.issuerId));
     console.log(userdata, 'userdata')
     console.log(admindata, 'admindata')
 
@@ -206,14 +210,22 @@ export class DidService {
     await this.delay(5000)
     console.log(userData.userAddress, userData.userPvtKey, issuerData.adminAddress, issuerData.adminPvtKey, 'asdf')
     const VC = await CreateVC(createVcDto, userDid, issuerDid);
-    const HashVcData = jwt.sign({VC, issuerDidId : issuerDid.did}, this.jwtSecretKey);
-    const SetVcData = await this.DidContract.setVcData(userDid.did, createVcDto.certificateName, HashVcData);
+    // const HashVcData = jwt.sign({VC, issuerDidId : issuerDid.did}, this.jwtSecretKey);
+    const SetVcData = await this.DidContract.setVcData(userDid.did, createVcDto.certificateName, VC);
     await SetVcData.wait();
+
+    const data = await this.db.insert(schema.UserVC).values({
+      userId: createVcDto.userId,
+      userDidId: userDid.did,
+      issuerId: createVcDto.issuerId,
+      issuerDidId: issuerDid.did,
+      certificateName: createVcDto.certificateName,
+    }).returning()
 
     // const certificate = await this.certificateService.generateCertificate(VC);
     // console.log(certificate, 'vc', VC);
     // const result = await verifyVC(VC, userDid, issuerDid, userData.privateKey, issuerData.privateKey);
-    console.log(SetVcData, VC, 'resultvc');
+    console.log(SetVcData, VC, 'resultvc', data);
     return {state : 200, message : 'vc created'}
   }
 
@@ -227,15 +239,22 @@ export class DidService {
     // console.log(categoryValue);
 
     const HashVcData = await this.DidContract.VcData(didValue, categoryValue);
-    const decodedData = jwt.verify(HashVcData, this.jwtSecretKey) as {VC : string, issuerDidId : string};
+    // const decodedData = jwt.verify(HashVcData, this.jwtSecretKey) as { VC: string, issuerDidId: string };
+    const VcData = await this.db.select().from(schema.UserVC).where(and(eq(schema.UserVC.userDidId, didValue), eq(schema.UserVC.certificateName, categoryValue)));
     
-    const issuerData = await this.DidContract.DidData(decodedData.issuerDidId);
-    const {adminAddress, adminPvtKey} = issuerData;
+    console.log(VcData, "vcdata")
+
+    const issuerData = await this.DidContract.DidData(VcData[0].issuerDidId);
+    const verifiedIssuerData = jwt.verify(issuerData, this.jwtSecretKey)  as { adminAddress: string, adminPvtKey: string };
+    const {adminAddress, adminPvtKey} = verifiedIssuerData;
 
     const userData = await this.DidContract.DidData(verifyVcDTO.userDidId);
-    const {userAddress, userPvtKey} = userData;
+    const verifiedUserData = jwt.verify(userData, this.jwtSecretKey) as {userAddress : string, userPvtKey : string};
+    const {userAddress, userPvtKey} = verifiedUserData;
 
-    const verifiedVC = await verifyVC(HashVcData, verifyVcDTO.userDidId, decodedData.issuerDidId, userPvtKey, adminPvtKey);
+    console.log(HashVcData)
+   console.log( verifyVcDTO.userDidId, VcData[0].issuerDidId, userPvtKey, adminPvtKey, "userdata", userData, "issuerData" , issuerData)
+    const verifiedVC = await verifyVC(HashVcData, verifyVcDTO.userDidId, VcData[0].issuerDidId, userPvtKey, adminPvtKey);
     return verifiedVC;
   }
 

@@ -38,7 +38,7 @@ export const admin = pgTable('admin', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
-export const adminRequest = pgTable('adminRequest', {
+export const adminRequest = pgTable('adminrequest', {
   id : serial('id'),
   userName: varchar('userName', { length: 255 }).notNull(),
   userId: varchar('userId', { length: 255 }).notNull().primaryKey(),
@@ -52,7 +52,7 @@ export const adminRequest = pgTable('adminRequest', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
-export const VCprovider = pgTable('vcprovider', {
+export const VcLogs = pgTable('vclogs', {
   id: serial('id'),
   userName: varchar('userName', {length: 255}).notNull(),
   userId: varchar('userId', {length: 255}).notNull(),
@@ -65,9 +65,11 @@ export const VCprovider = pgTable('vcprovider', {
 
 export const UserVC = pgTable('uservc', {
   id: serial('id'),
-  userId: varchar('userId', {length: 255}).notNull(),
-  certificateName: varchar('certificateName', {length: 255}).notNull(),
-  didAddress: varchar('didAddress', {length: 255}).notNull(),
+  userId: varchar('userId', { length: 255 }).notNull(),
+  userDidId: varchar('userDidId', { length: 255 }).notNull(),
+  issuerId: varchar('issuerId', { length: 255 }).notNull(),
+  issuerDidId: varchar('issuerDidId', { length: 255 }).notNull(),
+  certificateName: varchar('certificateName', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 })
-
-

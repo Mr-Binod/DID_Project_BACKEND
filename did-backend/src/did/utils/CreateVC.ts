@@ -12,7 +12,7 @@ export const CreateVC = async (createVcDTO: CreateVcDTO, userDid: EthrDID, issue
     const vcPayload = {
         sub: userDid.did,
         nbf: Math.floor(Date.now() / 1000),
-        issuer: issuerDid,
+        issuer: issuerDid.did,
         issuseDate: new Date().toISOString(),
         vc: {
             "@context": ['https://www.w3.org/2018/credentials/v1'],
@@ -30,7 +30,7 @@ export const CreateVC = async (createVcDTO: CreateVcDTO, userDid: EthrDID, issue
     }
     
     const JWT = await createVerifiableCredentialJwt(vcPayload, userDid as unknown as Issuer)
-    // console.log(JWT, vcPayload, 'vcPayload');
+    console.log(JWT, vcPayload, 'vcPayload');
     // console.log(did, 'createvcdid')
     
     return JWT;

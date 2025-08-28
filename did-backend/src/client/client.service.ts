@@ -24,7 +24,7 @@ export class ClientService {
     const data = await this.db.select().from(schema.UserVC).where(eq(schema.UserVC.userId, id))
     console.log(data, 'data')
     const VCdata = data.map(async (item) => {
-      const VC = await this.didService.getVC(item.didAddress, item.certificateName)
+      const VC = await this.didService.getVC(item.userDidId, item.certificateName)
       return VC
     })
     console.log(VCdata, 'vcdata')
