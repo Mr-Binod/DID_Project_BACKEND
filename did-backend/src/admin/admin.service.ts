@@ -34,7 +34,7 @@ export class AdminService {
 
   async savetempadmin(adminRequestDto : AdminRequestDto){ 
       // const {userId, userName, nickName, password, birthDate, phoneNumber, grade, imgPath } = adminRequestDto
-      const data = await this.db.insert(schema.adminRequest).values(adminRequestDto);
+      const data = await this.db.insert(schema.adminRequest).values(adminRequestDto).returning();
       return {state : 200, message : 'admin request saved', data};
     }
 
