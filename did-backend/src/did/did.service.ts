@@ -183,6 +183,7 @@ export class DidService {
     const userdata = await this.db.select().from(schema.user).where(eq(schema.user.userId, createVcDto.userId));
     const admindata = await this.db.select().from(schema.user).where(eq(schema.user.userId, createVcDto.issuerId));
     console.log(userdata, 'userdata')
+    console.log(admindata, 'admindata')
 
     const userPublicKey = userdata[0].walletAddress;
     const userWalletData : string = await this.DidContract.WalletData(userPublicKey);
