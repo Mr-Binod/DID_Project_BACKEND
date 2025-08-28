@@ -18,6 +18,7 @@ export class AdminController {
 
   @Post()
   createadmin(@Body() _data: CreateAdminDto) {
+    console.log(_data, 'dataadmin');
     return this.didService.createadmin(_data);
   }
 
