@@ -141,8 +141,8 @@ export class DidService {
     return {state : 200, message : 'signup successful', data : Data}
   }
 
-  async createadmin(CreateAdminDto: CreateAdminDto) {
-  const {userId, userName, nickName, password, birthDate, phoneNumber, grade, imgPath } = CreateAdminDto
+  async createadmin(createAdminDto: CreateAdminDto) {
+  const {userId, userName, nickName, password, birthDate, phoneNumber, grade, imgPath } = createAdminDto
 
   const pvtkey : string = CreatePvtKey({id : userId});
   const wallet : ethers.Wallet = new ethers.Wallet(pvtkey, this.provider);
@@ -168,7 +168,7 @@ export class DidService {
     const EoaData = await this.DidContract.WalletData(_address);
     console.log(EoaData, 'eoadataadmin');
     const Data = await this.db.insert(schema.admin).values({
-        ...CreateAdminDto,
+        ...createAdminDto,
         walletAddress : _address,
         didAddress : Issuerdid.did,
     }).returning()
