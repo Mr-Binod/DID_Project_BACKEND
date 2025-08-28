@@ -40,7 +40,7 @@ export const admin = pgTable('admin', {
 
 export const adminRequest = pgTable('adminRequest', {
   id : serial('id'),
-  userName: varchar('name', { length: 255 }).notNull(),
+  userName: varchar('userName', { length: 255 }).notNull(),
   userId: varchar('userId', { length: 255 }).notNull().primaryKey(),
   password: varchar('password', {length : 100}),
   nickName: varchar('nickName', { length: 255 }),
