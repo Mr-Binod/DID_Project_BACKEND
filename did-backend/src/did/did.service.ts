@@ -218,7 +218,7 @@ export class DidService {
     // const HashVcData = jwt.sign({VC, issuerDidId : issuerDid.did}, this.jwtSecretKey);
     const SetVcData = await this.DidContract.setVcData(userDid.did, createVcDto.certificateName, VC);
     await SetVcData.wait();
-
+    console.log(createVcDto)
     const VcConfirmedData = await this.db.insert(schema.vc_confirmed_logs).values(createVcDto).returning()
 
     const data = await this.db.insert(schema.user_vc).values({
