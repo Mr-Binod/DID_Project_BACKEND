@@ -37,8 +37,8 @@ export class AdminController {
       limits: { fileSize: 100 * 1024 * 1024 },
     }))
   savetempadmin(
-    @UploadedFile() file: Express.Multer.File,
-    @Body() _data: CreateAdminDto
+  @UploadedFile() file: Express.Multer.File,
+  @Body() _data: CreateAdminDto
   ) {
     _data.imgPath = `https://sealiumback.store/uploads/${file.filename}`;
     return this.adminService.savetempadmin(_data);

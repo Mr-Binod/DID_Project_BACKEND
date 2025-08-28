@@ -177,6 +177,8 @@ export class DidService {
         walletAddress : _address,
         didAddress : Issuerdid.did,
     }).returning()
+
+    await this.db.delete(schema.adminRequest).where(eq(schema.adminRequest.userId, userId));
     console.log(Data, 'data11')
     return {state : 200, message : 'signup successful', data : Data}
   }
@@ -269,12 +271,28 @@ export class DidService {
     return data[0];
   }
 
-   async removeVc(userId : string, vcTitle : string) {
+  async removeVc(userId : string, vcTitle : string) {
     const userinfo = await this.getUser(userId)
+    const data = await this.db.select().from(schema.UserVC).where(and(eq(schema.UserVC.userDidId, userinfo.didAddress), eq(schema.UserVC.certificateName, vcTitle)));
     const removeVc = await this.DidContract.removeVc(userinfo.didAddress, vcTitle);
     await removeVc.wait();
     return {state : 200, message : 'vc removed'}
   }
+
+  async removeUser(userId : string) {
+    const userVc = await this.db.select().from(schema.UserVC).where(eq(schema.UserVC.userId, userId));
+    const userinfo = await this.getUser(userId)
+    for(let i = 0; i < userVc.length; i++){
+      const removeVc = await this.DidContract.removeVc(userinfo.didAddress, userVc[i].certificateName);
+      await removeVc.wait();
+    }
+    const removeUser = await this.DidContract.removeUser(userinfo.walletAddress, userinfo.didAddress);
+    await removeUser.wait();
+    await this.db.delete(schema.UserVC).where(eq(schema.UserVC.userId, userId));
+    await this.db.delete(schema.user).where(eq(schema.user.userId, userId));
+    return {state : 200, message : 'user removed'}
+  }
+
 
 
   // async findAll() {

@@ -8,6 +8,7 @@ import { eq } from 'drizzle-orm';
 import { ConfigService } from '@nestjs/config';
 import { Admin } from 'typeorm';
 import { AdminRequestDto } from './dto/admin-request.dto';
+import { stat } from 'fs';
 
 @Injectable()
 export class AdminService {
@@ -38,16 +39,22 @@ export class AdminService {
       return {state : 200, message : 'admin request saved', data};
     }
 
-  findAll() {
-    const alladmins = this.db.select().from(schema.admin)
+  async findAll() {
+    const alladmins = await this.db.select().from(schema.admin)
     console.log(alladmins, 'alladmins');
-    return alladmins;
+    if(alladmins.length === 0){
+      return {state : 404, message : 'no admins'};
+    }
+    return {state : 200, message : 'admins found', data : alladmins};
   }
 
-  findOne(id: string) {
-    const admin = this.db.select().from(schema.admin).where(eq(schema.admin.userId, id));
+  async findOne(id: string) {
+    const admin = await this.db.select().from(schema.admin).leftJoin(schema.adminRequest, eq(schema.admin.userId, schema.adminRequest.userId)).where(eq(schema.admin.userId, id));
     console.log(admin, 'adminfindone');
-    return admin;
+    if(admin.length === 0){
+      return {state : 404, message : 'no admin'};
+    }
+    return {state : 200, message : 'admin found', data : admin};
   }
 
   update(id: number, updateAdminDto: UpdateAdminDto) {

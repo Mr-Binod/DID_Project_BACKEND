@@ -34,14 +34,20 @@ export class ClientService {
   async findAll() {
     const data = await this.db.select().from(schema.user)
     console.log(data, 'data')
-    return data;
+    if(data.length === 0){
+      return {state : 404, message : 'no users'};
+    }
+    return {state : 200, message : 'users found', data : data};
   }
 
   async findOne(id: string) {
     console.log(id, 'id')
     const data = await this.db.select().from(schema.user).where(eq(schema.user.userId, id))
     console.log(data, 'data')
-    return data;
+    if(data.length === 0){
+      return {state : 404, message : 'no user'};
+    }
+    return {state : 200, message : 'user found', data : data};
   }
 
   update(id: number, updateClientDto: UpdateClientDto) {
@@ -49,8 +55,8 @@ export class ClientService {
   }
   
   async remove(id: string) {
-    await this.db.delete(schema.user).where(eq(schema.user.userId, id));
-    return {state : 200, message : 'user deleted'};
+    
+    return this.didService.removeUser(id);
   }
 
   removevc(id: string, vc: string) {

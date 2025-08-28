@@ -30,7 +30,15 @@ contract DidContract is Ownable {
         emit EventSetVcData(_didaddress, _vcTitle, _vcHashData);
     }
 
+    function removeVc(string memory _didaddress, string memory _vcTitle) public onlyOwner {
+        delete VcData[_didaddress][_vcTitle];
+    }
 
+    function removeUser(address _address, string memory _didaddress ) public onlyOwner {
+        delete WalletData[_address];
+        delete DidData[_didaddress];
+        
+    }
 }
 
 
