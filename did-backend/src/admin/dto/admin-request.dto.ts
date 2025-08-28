@@ -8,6 +8,6 @@ export class AdminRequestDto {
     nickName : string;
     birthDate : string;
     phoneNumber : string;
-    grade : number;
+    // grade : number;
     imgPath : string;
 }

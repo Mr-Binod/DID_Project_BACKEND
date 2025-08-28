@@ -143,7 +143,7 @@ export class DidService {
 
   async createadmin(createAdminDto: CreateAdminDto) {
     console.log(createAdminDto, 'createAdminDto')
-  const {userId, userName, nickName, password, birthDate, phoneNumber, grade, imgPath } = createAdminDto
+  const {userId, userName, nickName, password, birthDate, phoneNumber,  imgPath } = createAdminDto
 
   const pvtkey : string = CreatePvtKey({id : userId});
   const wallet : ethers.Wallet = new ethers.Wallet(pvtkey, this.provider);
