@@ -36,6 +36,7 @@ export class KakaoAuthService {
   kakaoAuth() {
     const KakaoClientId = this.configService.get<string>('KAKAO_CLIENT_ID') as string;
     const RedirectUrl = this.configService.get<string>('REDIRECT_URL') as string;
+    console.log(RedirectUrl, 'redirecturl11')
     const kakaoAuth = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KakaoClientId}&redirect_uri=${RedirectUrl}`
     console.log(kakaoAuth, 'kakaoAuth')
     return kakaoAuth

@@ -27,4 +27,10 @@ export class CreateVcDTO {
 
     @IsString()
     issueDate : string;
+
+    @IsString()
+    ImagePath: string;
+
+    @IsString()
+    DOB : string;
 }

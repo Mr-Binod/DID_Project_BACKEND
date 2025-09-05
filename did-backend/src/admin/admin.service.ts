@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { Admin } from 'typeorm';
 import { AdminRequestDto } from './dto/admin-request.dto';
 import { stat } from 'fs';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AdminService {
@@ -35,9 +36,12 @@ export class AdminService {
 
   async savetempadmin(adminRequestDto : AdminRequestDto){ 
       // const {userId, userName, nickName, password, birthDate, phoneNumber, grade, imgPath } = adminRequestDto
+	const bcryptToken = await bcrypt.hash(adminRequestDto.password, 10)
+        adminRequestDto.password = bcryptToken;
       const data = await this.db.insert(schema.admin_request).values(adminRequestDto).returning();
       return {state : 200, message : 'admin request saved', data};
     }
+
 
   async findAll() {
     const alladmins = await this.db.select().from(schema.admin)
@@ -48,7 +52,7 @@ export class AdminService {
     return {state : 200, message : 'admins found', data : alladmins};
   }
 
-  async findOne(id: string) {
+  async findavailableId(id: string) {
     const admin = await this.db.select().from(schema.admin).leftJoin(schema.admin_request, eq(schema.admin.userId, schema.admin_request.userId)).where(eq(schema.admin.userId, id));
     console.log(admin, 'adminfindone');
     if(admin.length === 0){
@@ -56,7 +60,14 @@ export class AdminService {
     }
     return {state : 200, message : 'admin found', data : admin};
   }
-
+   async findOne(id: string) {
+    const admin = await this.db.select().from(schema.admin).where(eq(schema.admin.userId, id));
+    console.log(admin, 'adminfindone');
+    if(admin.length === 0){
+      return {state : 404, message : 'no admin'};
+    }
+    return {state : 200, message : 'admin found', data : admin};
+  }
   update(id: number, updateAdminDto: UpdateAdminDto) {
     return `This action updates a #${id} admin`;
   }

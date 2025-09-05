@@ -7,7 +7,7 @@ export class AdminRequestDto {
     password : string;
     nickName : string;
     birthDate : string;
-    phoneNumber : string;
+    
     // grade : number;
     imgPath : string;
 }

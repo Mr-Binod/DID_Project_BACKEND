@@ -31,16 +31,24 @@ export class KakaoAuthController {
   }
 
   @Get('/auth/kakao/callback')
+  @Redirect()
   async kakaoAuthCallback(
     @Res({passthrough : true}) res: Response,
+    
     @Query() data : {code : string}) {
       console.log(data)
       const code : string = data.code
       const {token, access_token} = await this.kakaoAuthService.kakaoAuthCallback(code);
-      res.cookie('login_access_token', token, {httpOnly : true, maxAge : 10 * 60 * 60 * 1000})
-      res.cookie('kakao_access_token', access_token, {httpOnly : true, maxAge : 10 * 60 * 60 * 1000})
-
-      return {state : 200, message : 'kakao login success'}
+      res.cookie('login_access_token', token, {
+  	httpOnly: true,
+  	secure: true, // HTTPS 필수
+  	sameSite: 'none', // cross-site 허용
+  	domain: '.sealiumback.store', // 모든 서브도메인에서 공유
+  	maxAge: 10 * 60 * 60 * 1000,
+}     );
+      res.header('login_access_token', token.toString())
+      return{url : "https://sealiumback.store/signup/did"}
+  
   }
 
   @Get('kakao/logout')

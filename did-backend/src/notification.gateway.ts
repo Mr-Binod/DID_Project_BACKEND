@@ -9,9 +9,6 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-@WebSocketGateway({ cors: {
-    origin: '*'
-}}) // enable CORS if frontend is separate
 
 
 export class NotificationsGateway

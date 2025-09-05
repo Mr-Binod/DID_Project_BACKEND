@@ -230,6 +230,8 @@ export class DidService {
       requestDate: createVcDto.requestDate,
       issueDate: createVcDto.issueDate,
       status: createVcDto.status,
+      ImagePath : createVcDto.ImagePath,
+      DOB : createVcDto.DOB
     }).returning()
 
     // const certificate = await this.certificateService.generateCertificate(VC);
@@ -243,30 +245,38 @@ export class DidService {
     // const VC = await CreateVC(createVcDto.userdid, createVcDto.name, createVcDto.type, createVcDto.issuerdid);
     const url = verifyVcDTO.urlLink;
     const parts = url.split('/');
-    const didValue = parts[3]; // 'did:ethers:91283'
+    const userId = parts[3]; // 'did:ethers:91283'
     const categoryValue = parts[4]; // 'categoryname'
     // console.log(didValue);
     // console.log(categoryValue);
-
-    const HashVcData = await this.DidContract.VcData(didValue, categoryValue);
+    const UserData = await this.db.select().from(schema.user).where(and(eq(schema.user.userId, userId)));
+    if(UserData.length < 1) return{state : 401, message : "verification failed"}
+    const HashVcData = await this.DidContract.VcData(UserData![0].didAddress, categoryValue);
+    console.log(HashVcData, 'hashvcdata')
+    if(!HashVcData) return {state : 401, message : "verification failed"}
     // const decodedData = jwt.verify(HashVcData, this.jwtSecretKey) as { VC: string, issuerDidId: string };
-    const VcData = await this.db.select().from(schema.user_vc).where(and(eq(schema.user_vc.userDidId, didValue), eq(schema.user_vc.certificateName, categoryValue)));
+    const VcData = await this.db.select().from(schema.user_vc).where(and(eq(schema.user_vc.userDidId, UserData![0].didAddress), eq(schema.user_vc.certificateName, categoryValue)));
     
     console.log(VcData, "vcdata")
 
-    const issuerData = await this.DidContract.DidData(VcData[0].issuerDidId);
-    const verifiedIssuerData = jwt.verify(issuerData, this.jwtSecretKey)  as { adminAddress: string, adminPvtKey: string };
-    const {adminAddress, adminPvtKey} = verifiedIssuerData;
-
     const userData = await this.DidContract.DidData(verifyVcDTO.userDidId);
+    if(userData.length < 1 ) return {state : 401, message : "verification failed"}
     const verifiedUserData = jwt.verify(userData, this.jwtSecretKey) as {userAddress : string, userPvtKey : string};
     const {userAddress, userPvtKey} = verifiedUserData;
-
+	console.log(VcData[0].issuerDidId, 'issuerdid')
+    const issuerData = await this.DidContract.DidData(VcData[0].issuerDidId);
+    if(issuerData.length < 1 ) return {state : 401, message : "verification failed"}
+    const verifiedIssuerData = jwt.verify(issuerData, this.jwtSecretKey)  as { adminAddress: string, adminPvtKey: string };
+    const {adminAddress, adminPvtKey} = verifiedIssuerData;
+   
     console.log(HashVcData)
-   console.log( verifyVcDTO.userDidId, VcData[0].issuerDidId, userPvtKey, adminPvtKey, "userdata", userData, "issuerData" , issuerData)
+    console.log( verifyVcDTO.userDidId, VcData[0].issuerDidId, userPvtKey, adminPvtKey, "userdata", userData, "issuerData" , issuerData)
     const verifiedVC = await verifyVC(HashVcData, verifyVcDTO.userDidId, VcData[0].issuerDidId, userPvtKey, adminPvtKey);
-    return verifiedVC;
-  }
+    if(verifiedVC) {
+      return {state : 200, message : verifiedVC};
+    }
+    return {state : 401, message : "verification failed"}
+   }
 
   async getVC(userdidId : string, vcTitle : string) {
     const VC = await this.DidContract.VcData(userdidId, vcTitle);

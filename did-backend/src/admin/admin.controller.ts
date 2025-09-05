@@ -8,6 +8,7 @@ import { CreateDidDto } from 'src/did/dto/create-did.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import multer from 'multer';
 import path from 'path';
+import * as bcrypt from 'bcrypt';
 
 @Controller('admin')
 export class AdminController {
@@ -40,8 +41,17 @@ export class AdminController {
   @UploadedFile() file: Express.Multer.File,
   @Body() _data: CreateAdminDto
   ) {
-    _data.imgPath = `https://sealiumback.store/uploads/${file.filename}`;
+    _data.imgPath = `https://sdmin.sealiumback.store/uploads/${file.filename}`;
     return this.adminService.savetempadmin(_data);
+  }
+
+  @Post('login')
+  async login(@Body() _data : {userId : string, password : string}) {
+	  const data = await this.adminService.findOne(_data.userId)
+	  if(data.state !== 200 ) return {state : 403, message : '아이디가 일지하지 않습니다'}
+	  const verifypwd = await bcrypt.compare(_data.password, data.data![0].password)
+	  if(!verifypwd) return ({state : 403, message : '아이디가 일지하지 않습니다'})
+	  return({state : 200, message : '로그인 성공했습니다'})
   }
 
   @Get('admins')
@@ -52,6 +62,10 @@ export class AdminController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.adminService.findOne(id);
+  }
+  @Get('availableid/:id')
+  findavailableId(@Param('id') id: string) {
+    return this.adminService.findavailableId(id)
   }
 
   @Patch(':id')

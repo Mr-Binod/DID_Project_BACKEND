@@ -21,4 +21,10 @@ export class CreateVcRequestDTO {
 
     @IsString()
     status : string;
+
+    @IsString()
+    DOB : string;
+
+    @IsString()
+    ImagePath: string;
 }

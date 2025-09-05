@@ -106,6 +106,20 @@
       "when": 1756382929671,
       "tag": "0015_clever_solo",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1756794946745,
+      "tag": "0016_bizarre_mystique",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1757032034364,
+      "tag": "0017_talented_vulcan",
+      "breakpoints": true
     }
   ]
 }
