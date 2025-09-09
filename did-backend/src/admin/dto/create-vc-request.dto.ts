@@ -9,9 +9,6 @@ export class CreateVcRequestDTO {
 
     @IsString()
     certificateName : string;
-    
-    @IsString()
-    requestDate : string;
 
     @IsString()
     description : string;

@@ -120,6 +120,48 @@
       "when": 1757032034364,
       "tag": "0017_talented_vulcan",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1757061770459,
+      "tag": "0018_overjoyed_moira_mactaggert",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1757298487420,
+      "tag": "0019_overconfident_mister_fear",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1757298857916,
+      "tag": "0020_whole_the_order",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1757299631128,
+      "tag": "0021_faithful_wild_child",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1757299799387,
+      "tag": "0022_nosy_lord_tyger",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1757386101288,
+      "tag": "0023_fresh_siren",
+      "breakpoints": true
     }
   ]
 }

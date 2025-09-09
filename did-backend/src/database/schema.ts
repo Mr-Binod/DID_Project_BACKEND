@@ -51,12 +51,24 @@ export const admin_request = pgTable('admin_request', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+export const admin_rejected = pgTable('admin_rejected', {
+  id : serial('id').primaryKey(),
+  userName: varchar('userName', { length: 255 }).notNull(),
+  userId: varchar('userId', { length: 255 }).notNull().unique(),
+  password: varchar('password', {length : 100}),
+  nickName: varchar('nickName', { length: 255 }),
+  birthDate: varchar('birthDate').notNull(),
+  grade: integer('grade').notNull().default(10),
+  imgPath: varchar('imgPath', { length: 255 }),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
 export const vc_request_logs = pgTable('vc_request_logs', {
   id: serial('id').primaryKey(),
   userName: varchar('userName', {length: 255}).notNull(),
   userId: varchar('userId', {length: 255}).notNull().references(() => user.userId, {onDelete : 'cascade'}),
   certificateName: varchar('certificateName', {length: 255}).notNull(),
-  requestDate: varchar('requestDate').notNull(),
   description: varchar('description', {length: 255}).notNull(),
   request: varchar('request', {length: 255}).notNull(),
   status : varchar('status', {length: 255}).notNull().default('pending'),
@@ -71,16 +83,21 @@ export const vc_confirmed_logs = pgTable('vc_confirmed_logs', {
   userName: varchar('userName', {length: 255}).notNull(),
   userId: varchar('userId', {length: 255}).notNull().references(() => user.userId, {onDelete : 'cascade'}),
   certificateName: varchar('certificateName', {length: 255}).notNull(),
-  requestDate: varchar('requestDate').notNull(),
   description: varchar('description', {length: 255}).notNull(),
   request: varchar('request', {length: 255}).notNull(),
   status : varchar('status', {length: 255}).notNull(),
   issuerId: varchar('issuerId', {length: 255}).notNull(),
-  issueDate: varchar('issueDate').notNull(),
   ImagePath :  varchar('ImagePath', {length: 255}).notNull(),
   DOB :  varchar('DOB', {length: 255}).notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
+})
+
+export const userLoginStats = pgTable('userStats', {
+  id : serial('id').primaryKey(),
+  userId: varchar('userId', { length: 255 }).notNull().references(() => user.userId),
+  loginAt: timestamp('loginAt').defaultNow(),
+  logoutAt: timestamp('logoutAt'),
 })
 
 export const user_vc = pgTable('user_vc', {
@@ -90,8 +107,6 @@ export const user_vc = pgTable('user_vc', {
   issuerId: varchar('issuerId', { length: 255 }).notNull(),
   issuerDidId: varchar('issuerDidId', { length: 255 }).notNull(),
   certificateName: varchar('certificateName', { length: 255 }).notNull(),
-  requestDate : varchar('requestDate', { length: 255 }).notNull(),
-  issueDate : varchar('issueDate', { length: 255 }).notNull(),
   status : varchar('status', { length: 255 }).notNull(),
   ImagePath :  varchar('ImagePath', {length: 255}).notNull(),
   DOB :  varchar('DOB', {length: 255}).notNull(),

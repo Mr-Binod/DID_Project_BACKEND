@@ -10,6 +10,7 @@ import { Admin } from 'typeorm';
 import { AdminRequestDto } from './dto/admin-request.dto';
 import { stat } from 'fs';
 import * as bcrypt from 'bcrypt';
+import { sql } from 'drizzle-orm';
 
 @Injectable()
 export class AdminService {
@@ -45,10 +46,6 @@ export class AdminService {
 
   async findAll() {
     const alladmins = await this.db.select().from(schema.admin)
-    console.log(alladmins, 'alladmins');
-    if(alladmins.length === 0){
-      return {state : 404, message : 'no admins'};
-    }
     return {state : 200, message : 'admins found', data : alladmins};
   }
 
@@ -72,9 +69,61 @@ export class AdminService {
     return `This action updates a #${id} admin`;
   }
 
-  remove(id: string) {
-    const admin = this.db.delete(schema.admin).where(eq(schema.admin.userId, id));
+
+  async pendingAdmins(){
+	const items = await this.db.select().from(schema.admin_request)
+	return {state : 200, message : 'pending admins request successful', data : items}
+  }
+ async rejectAdmin(id : string) {
+	 const userInfo = await this.db.select().from(schema.admin_request).where(eq(schema.admin_request.userId, id));
+	 if(userInfo.length < 1) return {state : 403, message : 'no pending user'}
+	 const inputData = userInfo![0]
+	 inputData.grade = 10 
+	 await this.db.delete(schema.admin_request).where(eq(schema.admin_request.userId, id))
+	 await this.db.insert(schema.admin_rejected).values(inputData)
+	 return {state : 200, message : 'reject successful'}
+	}
+async getAllRejectedAdmins() {
+	const admins = await this.db.select().from(schema.admin_rejected)
+	return {state : 200, message : 'rejected admins request successful', data : admins}
+}
+async getAllAdminsTotalNum() {
+	const admins = await this.db.select().from(schema.admin)
+	const pendingAdmins = await this.db.select().from(schema.admin_request)
+	const rejectedAdmins = await this.db.select().from(schema.admin_rejected)
+
+	return {Totaladmins : admins.length, TotalPendingAdmins : pendingAdmins.length, TotalRejectedAdmins : rejectedAdmins.length}
+}
+
+async gatAllVcInfo(){
+	try{
+		const approvedVc = await this.db.select().from(schema.user_vc)
+		const otherVc = await this.db.select().from(schema.vc_request_logs)
+		return{state : 200, message : 'request successful', data : [...approvedVc, ...otherVc]}
+
+	}catch {
+		return{state : 403, message : 'request failed'}
+	}
+}
+
+async getTotalUnA() {
+	const admins = await this.db.select().from(schema.admin)
+	const users = await this.db.select().from(schema.user)
+	return { state : 200, message : 'getTotalUnA successful', TotalAdmins : admins.length, TotalUsers : users.length}
+}
+async getVcRequests() {
+	try{
+	const VcRequests = await this.db.select().from(schema.vc_request_logs)
+	return {state : 200, message : 'vcrequest successful', data : VcRequests}
+	}
+	catch {
+		return {state : 403, message : 'vcrequest failed'}
+	}
+}	
+
+async remove(id: string) {
+    const admin = await this.db.delete(schema.admin).where(eq(schema.admin.userId, id));
     console.log(admin, 'admindeleted');
     return {state : 200, message : 'admin deleted'};
-  }
+  } 
 }

@@ -41,7 +41,7 @@ export class AdminController {
   @UploadedFile() file: Express.Multer.File,
   @Body() _data: CreateAdminDto
   ) {
-    _data.imgPath = `https://sdmin.sealiumback.store/uploads/${file.filename}`;
+    _data.imgPath = `https://api.sealiumback.store/uploads/${file.filename}`;
     return this.adminService.savetempadmin(_data);
   }
 
@@ -50,16 +50,57 @@ export class AdminController {
 	  const data = await this.adminService.findOne(_data.userId)
 	  if(data.state !== 200 ) return {state : 403, message : '아이디가 일지하지 않습니다'}
 	  const verifypwd = await bcrypt.compare(_data.password, data.data![0].password)
-	  if(!verifypwd) return ({state : 403, message : '아이디가 일지하지 않습니다'})
-	  return({state : 200, message : '로그인 성공했습니다'})
+	  if(!verifypwd) return ({state : 403, message : '비밀번호가  일지하지 않습니다'})
+	  return({state : 200, message : '로그인 성공했습니다', data})
   }
+
+  @Get('superadmin')
+  async GetsuperAdmin(){
+	  const SuperAdminPwd = await bcrypt.hash('admin123@', 10)
+	  return (SuperAdminPwd)
+	 }
 
   @Get('admins')
   findAll() {
     return this.adminService.findAll();
   }
+	
+  @Get('pendingadmins')
+  pendingAdmins() {
+	  return this.adminService.pendingAdmins();
+	 }
 
-  @Get(':id')
+  @Delete('rejectadmin')
+  rejectAdmin(@Body('userId') userId: string)  {
+	  console.log(userId, 'rejectid')
+	 return this.adminService.rejectAdmin(userId)
+	} 
+
+
+  @Get('getallvcinfo')
+  gatAllVcInfo(){
+	  return this.adminService.gatAllVcInfo()
+	}
+
+  @Get('rejectedadmins')
+  getAllRejectedAdmins(){
+	  return this.adminService.getAllRejectedAdmins()
+  }
+
+  @Get('getalladminstotalnum')
+  getAllAdminsTotalNum(){
+	  return this.adminService.getAllAdminsTotalNum()
+	}
+  @Get('gettotaluna')
+  getTotalUnA() {
+	  return this.adminService.getTotalUnA()
+	 }
+
+  @Get('vcrequestlogs')
+  getVcRqeusts(){
+	return this.adminService.getVcRequests()
+  }
+  @Get('find/:id')
   findOne(@Param('id') id: string) {
     return this.adminService.findOne(id);
   }

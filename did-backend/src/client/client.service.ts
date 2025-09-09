@@ -9,10 +9,16 @@ import { CreateVcRequestDTO } from 'src/admin/dto/create-vc-request.dto';
 
 @Injectable()
 export class ClientService {
+
+  private delay : (ms : number) => Promise<void>;
   constructor(
     private didService: DidService,
     @Inject('DATABASE') private db: NodePgDatabase<typeof schema>,
-  ) {}
+  ) {
+	    this.delay = (ms : number) => {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+  }
 
   async createVcRequest(
     createVcRequestDTO: CreateVcRequestDTO
@@ -26,11 +32,41 @@ export class ClientService {
     const data = await this.db.select().from(schema.user_vc).where(eq(schema.user_vc.userId, id))
     console.log(data, 'data')
     const VCdata = data.map(async (item) => {
-      const VC = await this.didService.getVC(item.userDidId, item.certificateName)
+      const VC = await this.didService.getVC( item.userDidId, item.certificateName, item.userId)
+      
       return VC
     })
-    console.log(VCdata, 'vcdata')
-    return VCdata;
+    const newVcData = await Promise.all(VCdata)
+    console.log(newVcData, 'newVcData')
+    return newVcData;
+  }
+  
+  async findUserPendingVc(id: string) {
+	  return this.await.select().from(schema.vc_request_logs).where(eq(schema.vc_request_logs.userId, id)
+  }
+
+
+  async certRevokeReject(id : string, certname : string) {
+  	await this.db.update(schema.vc_request.logs).set({status : 'rejected'}).where(and(eq(schema.vc_request_logs.userId, id)),eq(schema.vc_request_logs.certificateName, certname))
+       return {state : 200, message : 'certrevokereject successful'}	
+  }
+
+  async certApproveReject(id : string, certname : string){
+	       await this.db.update(schema.vc_request.logs).set({status : 'approved'}).where(and(eq(schema.vc_request_logs.userId, id)),eq(schema.vc_request_logs.certificateName, certname))
+       return {state : 200, message : 'certApproveReject successful'}
+  }
+  async certRejectIssue(id : string, certname : string) {
+	              await this.db.update(schema.vc_request.logs).set({status : 'rejected'}).where(and(eq(schema.vc_request_logs.userId, id)),eq(schema.vc_request_logs.certificateName, certname))
+       return {state : 200, message : 'certApproveReject successful'}
+  }
+
+  async UserLoginStats(id : string) {
+	  await this.db.insert().(schema.userLoginStats).values({
+		  userId : id})
+		  return{ state : 200, message : 'user loginstats inserted'}
+  }
+  async getUserLoginStats(){
+	  return await this.db.select().from(schem.userLoginStats)
   }
 
   async findAll() {

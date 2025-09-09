@@ -65,13 +65,13 @@ export class DidService {
 
     const didAddress = Userdid.did;
     const HashWalletData = jwt.sign({address : _address, privateKey : pvtkey}, this.jwtSecretKey)
-    const SetWalletData = await this.DidContract.setWalletData(_address, HashWalletData);
+    const SetWalletData = await this.DidContract.setWalletData(_address, didAddress, HashWalletData);
     await SetWalletData.wait();
 
-    await this.delay(5000)
+    //await this.delay(5000)
     // const HashUserDid = jwt.sign(this.Userdid, this.jwtSecretKey)
-    const SetDidData = await this.DidContract.setDidData(didAddress, HashWalletData);
-    await SetDidData.wait();
+    //const SetDidData = await this.DidContract.setDidData(didAddress, HashWalletData);
+    //await SetDidData.wait();
 
     const ContractDidData = await this.DidContract.DidData(_address);
     console.log(ContractDidData, 'contractdiddata')
@@ -108,13 +108,13 @@ export class DidService {
     const didAddress = Userdid.did;
 
     const HashWalletData = jwt.sign({userAddress : _address, userPvtKey : pvtkey}, this.jwtSecretKey)
-    const SetEoaData = await this.DidContract.setWalletData(_address, HashWalletData);
+    const SetEoaData = await this.DidContract.setWalletData(_address, didAddress, HashWalletData);
     await SetEoaData.wait();
 
-    await this.delay(5000)
-    const setDidData = await this.DidContract.setDidData(didAddress, HashWalletData);
-    await setDidData.wait();
-    console.log(setDidData, 'setdiddata')
+    //await this.delay(5000)
+    //const setDidData = await this.DidContract.setDidData(didAddress, HashWalletData);
+    //await setDidData.wait();
+    //console.log(setDidData, 'setdiddata')
     const ContractDidData = await this.DidContract.WalletData(_address);
     console.log(ContractDidData, 'contractdiddata')
     
@@ -159,16 +159,17 @@ export class DidService {
 
   const HashWalletData = jwt.sign({adminAddress : _address , adminPvtKey : pvtkey}, this.jwtSecretKey)
     // console.log(HashWalletData, 'hashwallet');
-
-    const SetEoaData = await this.DidContract.setWalletData(_address, HashWalletData);
+	
+    const didAddress = Issuerdid.did
+    const SetEoaData = await this.DidContract.setWalletData(_address, didAddress, HashWalletData);
     const receipt = await SetEoaData.wait()
     // console.log(receipt.status, 'seteoadataadmin')
     //     console.log(SetEoaData, 'seteoadataadmin')
     //     console.log(_address, 'addressadmin')
     
-    const didAddress = Issuerdid.did
-    const setDidData = await this.DidContract.setDidData(didAddress, HashWalletData);
-    await setDidData.wait();
+    //const didAddress = Issuerdid.did
+    //const setDidData = await this.DidContract.setDidData(didAddress, HashWalletData);
+    //await setDidData.wait();
 
     const EoaData = await this.DidContract.WalletData(_address);
     console.log(EoaData, 'eoadataadmin');
@@ -227,13 +228,12 @@ export class DidService {
       issuerId: createVcDto.issuerId,
       issuerDidId: issuerDid.did,
       certificateName: createVcDto.certificateName,
-      requestDate: createVcDto.requestDate,
-      issueDate: createVcDto.issueDate,
       status: createVcDto.status,
       ImagePath : createVcDto.ImagePath,
       DOB : createVcDto.DOB
     }).returning()
 
+    await this.db.update(schema.vc_request_logs).set({status : createVcDto.status}).where(and(eq(schema.vc_request_logs.userId, createVcDto.userId),eq(schema.vc_request_logs.certificateName , createVcDto.certificateName)))
     // const certificate = await this.certificateService.generateCertificate(VC);
     // console.log(certificate, 'vc', VC);
     // const result = await verifyVC(VC, userDid, issuerDid, userData.privateKey, issuerData.privateKey);
@@ -278,7 +278,16 @@ export class DidService {
     return {state : 401, message : "verification failed"}
    }
 
-  async getVC(userdidId : string, vcTitle : string) {
+  async getVC(userdidId : string, vcTitle : string, userId : string) {
+    const VC = await this.DidContract.VcData(userdidId, vcTitle);
+    const urlLink = `https://api.sealiumback.store/${userId}/${vcTitle}`
+
+    const verifiedData = await this.verifyvc({userDidId: userdidId, urlLink} )
+    console.log(VC,'vc',verifiedData)
+    return verifiedData;
+  }
+
+    async getSingleVC(userdidId : string, vcTitle : string) {
     const VC = await this.DidContract.VcData(userdidId, vcTitle);
     return VC;
   }

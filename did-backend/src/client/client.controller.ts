@@ -110,8 +110,38 @@ export class ClientController {
   findAll() {
     return this.clientService.findAll();
   }
-
   
+  @Get('loginstats')
+  getUserLoginStats(){
+	  return this.clientService.getUserLoginStats()
+	  }
+
+  @Post('loginstats')
+  userLoginStats(@Body() id: string){
+	  return this.clientService.userLoginStats(id)
+	}
+ 
+  @Get('pendingvc/:id')
+  findUserPendingVc(@Param('id')){
+	  return this.clientService.userLoginStats(id)
+  }
+
+  @Patch('rejectrevoke')
+  certRevokeReject(@Body() userId : string, certName : string){
+	  return this.clientService.certRevokeReject(userId, certName)
+  }
+
+    @Patch('approverevoke')
+  certRevokeReject(@Body() userId : string, certName : string){
+          return this.clientService.certApproveReject(userId, certName)
+  }
+
+    @Patch('rejectissue')
+  certRevokeReject(@Body() userId : string, certName : string){
+          return this.clientService.certRejectIssue(userId, certName)
+  }
+  
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     console.log(id, 'id')

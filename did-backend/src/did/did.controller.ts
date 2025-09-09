@@ -62,7 +62,7 @@ export class DidController {
     @Res() res: Response,
   ) {
     const userdidId : string = (await this.didService.getUser(userId)).didAddress;
-    const VC = await this.didService.getVC(userdidId, vcTitle);
+    const VC = await this.didService.getSingleVC(userdidId, vcTitle);
     const pdfBuffer = await this.certificateService.generateCertificate(VC);
     const filename = encodeURIComponent(`${name}_certificate.pdf`);
     res.set({
