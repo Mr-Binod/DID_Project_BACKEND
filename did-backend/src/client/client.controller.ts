@@ -122,7 +122,7 @@ export class ClientController {
 	}
  
   @Get('pendingvc/:id')
-  findUserPendingVc(@Param('id')){
+  findUserPendingVc(@Param('id') id : string){
 	  return this.clientService.userLoginStats(id)
   }
 
@@ -132,12 +132,12 @@ export class ClientController {
   }
 
     @Patch('approverevoke')
-  certRevokeReject(@Body() userId : string, certName : string){
+  certApproveReject(@Body() userId : string, certName : string){
           return this.clientService.certApproveReject(userId, certName)
   }
 
     @Patch('rejectissue')
-  certRevokeReject(@Body() userId : string, certName : string){
+  certRejectIssue(@Body() userId : string, certName : string){
           return this.clientService.certRejectIssue(userId, certName)
   }
   
