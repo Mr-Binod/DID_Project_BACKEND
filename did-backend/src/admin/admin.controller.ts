@@ -110,8 +110,22 @@ export class AdminController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAdminDto: UpdateAdminDto) {
-    return this.adminService.update(+id, updateAdminDto);
+   @UseInterceptors(FileInterceptor('file', {
+      storage: multer.diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+        const safeName = Buffer.from(file.originalname, "latin1").toString(
+          "utf8"
+        );
+        const parsed = path.parse(safeName);
+        cb(null, `${parsed.name}_${Date.now()}${parsed.ext}`);
+      },
+      }),
+      limits: { fileSize: 100 * 1024 * 1024 },
+    }))
+  update(@UploadedFile() file: Express.Multer.File ,@Param('id') id: string, @Body() updateAdminDto: UpdateAdminDto) {
+	  updateAdminDto.imgPath = `https://api.sealiumback.store/uploads/${file.filename}`;
+    return this.adminService.update(id, updateAdminDto);
   }
 
   @Delete(':id')

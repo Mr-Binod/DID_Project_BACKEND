@@ -65,8 +65,12 @@ export class AdminService {
     }
     return {state : 200, message : 'admin found', data : admin};
   }
-  update(id: number, updateAdminDto: UpdateAdminDto) {
-    return `This action updates a #${id} admin`;
+async  update(id : string, updateAdminDto: UpdateAdminDto) {
+	try{	 
+       	const data = await this.db.update(schema.admin).set(updateAdminDto).where(eq(schema.admin.userId, id))
+    	return {status : 200, message : 'admin info update successful'}
+	}catch {
+		return {status : 402, message : 'admin info update failed'}
   }
 
 
@@ -97,14 +101,15 @@ async getAllAdminsTotalNum() {
 
 async gatAllVcInfo(){
 	try{
-		const approvedVc = await this.db.select().from(schema.user_vc)
+	//	const approvedVc = await this.db.select().from(schema.user_vc)
 		const otherVc = await this.db.select().from(schema.vc_request_logs)
-		return{state : 200, message : 'request successful', data : [...approvedVc, ...otherVc]}
+		return{state : 200, message : 'request successful', data : [ ...otherVc]}
 
 	}catch {
 		return{state : 403, message : 'request failed'}
 	}
 }
+
 
 async getTotalUnA() {
 	const admins = await this.db.select().from(schema.admin)

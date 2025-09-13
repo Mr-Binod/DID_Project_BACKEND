@@ -20,8 +20,8 @@ export class CreateAdminDto {
     @IsString()
     imgPath : string;
 
-    @IsString()
-    phoneNumber : string;
+  //  @IsString()
+//    phoneNumber : string;
  
     // @IsNumber()
     // grade : number;

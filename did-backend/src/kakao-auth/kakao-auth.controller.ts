@@ -58,12 +58,18 @@ export class KakaoAuthController {
   }
 
   @Get('/auth/kakao/logout/callback')
+  @Redirect()
   kakaoLogoutCallback(
     @Res({passthrough : true}) res: Response
   ){
-    res.clearCookie('login_access_token');
-    res.clearCookie('kakao_access_token');
-    return {state : 200, message : 'logout success'}
+    res.clearCookie('login_access_token', { 
+	  httpOnly: true,
+	  secure: true,
+	  sameSite: 'none',
+	  domain: '.sealiumback.store',
+	  path: '/',
+	});
+    return {url : 'https://sealiumback.store'}
   }
 
   @Get(':id')

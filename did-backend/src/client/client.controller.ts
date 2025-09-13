@@ -1,4 +1,4 @@
-import { Controller,Req, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller,Req, Redirect, Get, Post, Body, Patch, Param, Res, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ClientService } from './client.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
@@ -13,7 +13,7 @@ import { CreateVcRequestDTO } from 'src/admin/dto/create-vc-request.dto';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
-import type {  Request } from 'express';
+import type { Response, Request } from 'express';
 
 @Controller('user')
 export class ClientController {
@@ -24,7 +24,7 @@ export class ClientController {
   ) {}
 
   @Post()
-   @UseInterceptors(FileInterceptor('file', {
+  @UseInterceptors(FileInterceptor('file', {
     storage: multer.diskStorage({
       destination: './uploads',
       filename: (req, file, cb) => {
@@ -50,16 +50,38 @@ export class ClientController {
   }
 
   @Post('login')
-  async findO(@Body() _data: {userid:string, password:string}) {
+  async UpdateLogin(@Res({passthrough : true}) res: Response,
+	  @Body() _data: {userid:string, password:string}) {
 	const jwtSecretKey: string = this.configService.get<string>('JWT_SECRET_KEY') as string; 
   	const data = await this.clientService.findOne(_data.userid)
 	console.log(data, 'adf')
+	const token = jwt.sign(data, jwtSecretKey, {expiresIn : '1d'})
 	
 	if(data.state !== 200) return data
 	const result = await bcrypt.compare(_data.password, data.data![0].password)
 	  console.log(result)
-                if(result) return({state : 200, message : '로그인 성공'})
+                if(result){
+		res.cookie('login_access_token', token, {
+      		httpOnly: true,
+      		secure: true, // HTTPS 필수
+      		sameSite: 'none', // cross-site 허용
+      		domain: '.sealiumback.store', // 모든 서브도메인에서 공유
+      		maxAge: 10 * 60 * 60 * 1000,
+    	});
+		await this.clientService.UpdateLogin(_data.userid)
+       		return({state : 200, message : '로그인 성공'})}
+
                 return {state : 402, message : '아이디와 비밀번호를 일치하지 않습'}
+   }
+
+   @Get('logout')
+   @Redirect()
+   userLogout(@Res({ passthrough: true }) res: Response) {
+	   res.clearCookie('login_access_token', {
+		   path: '/',
+		  domain: '.sealiumback.store'
+	   })
+	   return {url : 'https://sealiumback.store'}
    }
 
    @Get('oauth')
@@ -68,7 +90,12 @@ export class ClientController {
 		const jwtSecretKey: string = this.configService.get<string>('JWT_SECRET_KEY') as string;
 		const loginAccessToken : string = req.cookies['login_access_token'];
 		console.log(loginAccessToken, jwtSecretKey)
-		const data = await jwt.verify(loginAccessToken, jwtSecretKey)
+		const data:any = await jwt.verify(loginAccessToken, jwtSecretKey)
+		try{
+			await this.clientService.UpdateLogin(data.id)
+		}catch {
+			await this.clientService.UpdateLogin(data.data![0].id)
+		}
 		console.log(data, 'tokendata')
 		return data
 	}
@@ -90,7 +117,6 @@ export class ClientController {
   createVcRequest(
     @UploadedFile() file: Express.Multer.File,
     @Body() createVcRequestDTO : CreateVcRequestDTO) {
-	  console.log(createVcRequestDTO, ' createvc')
 	  createVcRequestDTO.ImagePath = `https://api.sealiumback.store/uploads/${file.filename}`;
     return this.clientService.createVcRequest(createVcRequestDTO);
   }
@@ -127,18 +153,20 @@ export class ClientController {
   }
 
   @Patch('rejectrevoke')
-  certRevokeReject(@Body() userId : string, certName : string){
-	  return this.clientService.certRevokeReject(userId, certName)
+  certRevokeReject(@Body()data : { userId : string, certName : string}){
+	  return this.clientService.certRevokeReject(data.userId, data.certName)
   }
 
     @Patch('approverevoke')
-  certApproveReject(@Body() userId : string, certName : string){
-          return this.clientService.certApproveReject(userId, certName)
+  certApproveReject(@Body() data : { userId : string, certName : string}){
+	  
+          return this.clientService.certApproveReject(data.userId, data.certName)
   }
 
     @Patch('rejectissue')
-  certRejectIssue(@Body() userId : string, certName : string){
-          return this.clientService.certRejectIssue(userId, certName)
+  certRejectIssue(@Body() data : {userId : string, certName : string}){
+	
+          return this.clientService.certRejectIssue(data.userId, data.certName)
   }
   
 
@@ -149,8 +177,23 @@ export class ClientController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateClientDto: UpdateClientDto) {
-    return this.clientService.update(+id, updateClientDto);
+    @UseInterceptors(FileInterceptor('file', {
+    storage: multer.diskStorage({
+      destination: './uploads',
+      filename: (req, file, cb) => {
+      const safeName = Buffer.from(file.originalname, "latin1").toString(
+        "utf8"
+      );
+      const parsed = path.parse(safeName);
+      cb(null, `${parsed.name}_${Date.now()}${parsed.ext}`);
+    },
+    }),
+    limits: { fileSize: 100 * 1024 * 1024 },
+  }))
+  updateUserInfo(@UploadedFile() file: Express.Multer.File,
+	  @Param('id') id: string, @Body() updateClientDto: UpdateClientDto) {
+	updateClientDto.imgPath =  `https://api.sealiumback.store/uploads/${file.filename}`;
+    return this.clientService.updateUserInfo(id,  updateClientDto);
   }
 
   @Delete(':id')

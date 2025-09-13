@@ -143,7 +143,7 @@ export class DidService {
 
   async createadmin(createAdminDto: CreateAdminDto) {
     console.log(createAdminDto, 'createAdminDto')
-  const {userId, userName, nickName, password, birthDate, phoneNumber,  imgPath } = createAdminDto
+  const {userId, userName, nickName, password, birthDate,  imgPath } = createAdminDto
 
   const pvtkey : string = CreatePvtKey({id : userId});
   const wallet : ethers.Wallet = new ethers.Wallet(pvtkey, this.provider);
@@ -221,7 +221,8 @@ export class DidService {
     await SetVcData.wait();
     console.log(createVcDto)
     const VcConfirmedData = await this.db.insert(schema.vc_confirmed_logs).values(createVcDto).returning()
-
+	
+    const now = new Date();
     const data = await this.db.insert(schema.user_vc).values({
       userId: createVcDto.userId,
       userDidId: userDid.did,
@@ -229,8 +230,10 @@ export class DidService {
       issuerDidId: issuerDid.did,
       certificateName: createVcDto.certificateName,
       status: createVcDto.status,
+      description : createVcDto.description,
       ImagePath : createVcDto.ImagePath,
-      DOB : createVcDto.DOB
+      DOB : createVcDto.DOB,
+      updatedAt : now
     }).returning()
 
     await this.db.update(schema.vc_request_logs).set({status : createVcDto.status}).where(and(eq(schema.vc_request_logs.userId, createVcDto.userId),eq(schema.vc_request_logs.certificateName , createVcDto.certificateName)))
@@ -300,6 +303,7 @@ export class DidService {
 
   async removeVc(userId : string, vcTitle : string) {
     const userinfo = await this.getUser(userId)
+    console.log(userinfo, userId, vcTitle, 'zzz')
     const data = await this.db.select().from(schema.user_vc).where(and(eq(schema.user_vc.userDidId, userinfo.didAddress), eq(schema.user_vc.certificateName, vcTitle)));
     const removeVc = await this.DidContract.removeVc(userinfo.didAddress, vcTitle);
     await removeVc.wait();
@@ -309,12 +313,15 @@ export class DidService {
   async removeUser(userId : string) {
     const userVc = await this.db.select().from(schema.user_vc).where(eq(schema.user_vc.userId, userId));
     const userinfo = await this.getUser(userId)
-    for(let i = 0; i < userVc.length; i++){
-      const removeVc = await this.DidContract.removeVc(userinfo.didAddress, userVc[i].certificateName);
-      await removeVc.wait();
-    }
     const removeUser = await this.DidContract.removeUser(userinfo.walletAddress, userinfo.didAddress);
     await removeUser.wait();
+    //await this.delay(8000)
+    //for(let i = 0; i < userVc.length; i++){
+      //const removeVc = await this.DidContract.removeVc(userinfo.didAddress, userVc[i].certificateName);
+      //await removeVc.wait();
+     // await this.delay(8000)
+   // }
+   
     await this.db.delete(schema.user).where(eq(schema.user.userId, userId));
     return {state : 200, message : 'user removed'}
   }
