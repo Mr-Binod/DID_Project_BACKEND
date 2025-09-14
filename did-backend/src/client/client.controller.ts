@@ -81,7 +81,7 @@ export class ClientController {
 		   path: '/',
 		  domain: '.sealiumback.store'
 	   })
-	   return {url : 'https://sealiumback.store'}
+     return { state : 200, message : 'client logout successful'}
    }
 
    @Get('oauth')

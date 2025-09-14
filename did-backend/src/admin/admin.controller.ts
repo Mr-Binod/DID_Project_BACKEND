@@ -100,7 +100,7 @@ export class AdminController {
       path: '/',
       domain: '.sealiumback.store'
     })
-    return { url: 'https://admin.sealiumback.store' }
+    return { state : 200, message : 'admin logout successful'}
   }
 
   @Get('pendingadmins')
