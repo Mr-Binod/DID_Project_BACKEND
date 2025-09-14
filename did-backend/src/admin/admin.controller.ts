@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res } from '@nestjs/common';
+import {Redirect, Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res, Req } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
@@ -58,7 +58,7 @@ export class AdminController {
 	  if(!verifypwd) return ({state : 403, message : '아이디와 비밀번호가 일치하지 않습니다'})
 
 	const token = jwt.sign(data, jwtSecretKey, {expiresIn : '1d'})
-		res.cookie('login_access_token', token, {
+		res.cookie('admin_access_token', token, {
       		httpOnly: true,
       		secure: true, // HTTPS 필수
       		sameSite: 'none', // cross-site 허용
@@ -69,6 +69,18 @@ export class AdminController {
 
 	  return({state : 200, message : '로그인 성공했습니다', data})
   }
+  
+  
+   @Get('oauth')
+   async Oauth (
+	@Req() req: Request ) {
+		const jwtSecretKey: string = this.configService.get<string>('JWT_SECRET_KEY') as string;
+		const adminAccessToken : string = req.cookies['admin_access_token'];
+	
+		const data:any = await jwt.verify(adminAccessToken, jwtSecretKey)
+		console.log(data, 'tokendata')
+		return data
+	}	
 
   @Get('superadmin')
   async GetsuperAdmin(){
@@ -80,7 +92,17 @@ export class AdminController {
   findAll() {
     return this.adminService.findAll();
   }
-	
+
+   @Get('logout')
+   @Redirect()
+   userLogout(@Res({ passthrough: true }) res: Response) {
+	   res.clearCookie('admin_access_token', {
+		   path: '/',
+		  domain: '.sealiumback.store'
+	   })
+	   return {url : 'https://api.sealiumback.store'}
+   }
+
   @Get('pendingadmins')
   pendingAdmins() {
 	  return this.adminService.pendingAdmins();
@@ -149,20 +171,20 @@ async  update(@UploadedFile() file: Express.Multer.File ,
 	 console.log(response, ' admin response')
 	  if(response.data) {
 		  const token = jwt.sign(response.data[0], jwtSecretKey, {expiresIn : '1d'})
-		  await res.clearCookie('login_access_token', {
+		  await res.clearCookie('admin_access_token', {
 		   httpOnly: true,
 		  secure: true,
 		  sameSite: 'none',
 		  domain: '.sealiumback.store',
 		  path: '/',
 	   })
-		await res.cookie('login_access_token', token, {
+   		res.cookie('admin_access_token', token, {
       		httpOnly: true,
       		secure: true, // HTTPS 필수
       		sameSite: 'none', // cross-site 허용
       		domain: '.sealiumback.store', // 모든 서브도메인에서 공유
       		maxAge: 10 * 60 * 60 * 1000,
-    	}); 	
+    	}); 		   
 		return response}
 	return response
 

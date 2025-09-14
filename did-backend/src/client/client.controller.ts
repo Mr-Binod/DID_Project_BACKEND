@@ -85,12 +85,10 @@ export class ClientController {
    }
 
    @Get('oauth')
-   async Oauth (
-	@Req() req: Request ) {
+   async Oauth (@Req() req: Request ) {
 		const jwtSecretKey: string = this.configService.get<string>('JWT_SECRET_KEY') as string;
 		const loginAccessToken : string = req.cookies['login_access_token'];
-		console.log(loginAccessToken, jwtSecretKey)
-		const data:any = await jwt.verify(loginAccessToken, jwtSecretKey)
+                const data:any = await jwt.verify(loginAccessToken, jwtSecretKey)     
 		try{
 			await this.clientService.UpdateLogin(data.id)
 		}catch {
