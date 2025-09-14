@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.use(cookieParser())
   app.use(cors({
-  	origin: ['https://vc.sealiumback.store', 'https://sealiumback.store', 'sealiumback.store', 'http://localhost:3000', 'https://verify.sealiumback.store','https://admin.sealiumback.store' ], // 배열로 안 해도 됨
+  	origin: ['https://vc.sealiumback.store', 'https://sealiumback.store', 'sealiumback.store', 'http://localhost:3000','http://localhost:3001', 'https://verify.sealiumback.store','https://admin.sealiumback.store' ], // 배열로 안 해도 됨
   	credentials: true,                   // 쿠키 허용	
 }))
   app.use('/uploads', express.static(join(__dirname, '..','..', 'uploads')));

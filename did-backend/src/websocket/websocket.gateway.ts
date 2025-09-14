@@ -11,7 +11,7 @@ import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
   cors: {
-    origin: ["https://sealiumback.store", "http://localhost:3000"], // or "*" while testing
+    origin: ['https://vc.sealiumback.store', 'https://sealiumback.store', 'sealiumback.store', 'http://localhost:3000', 'https://verify.sealiumback.store','https://admin.sealiumback.store' ],
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -23,11 +23,14 @@ export class WebsocketGateway
   @WebSocketServer()
   server: Server;
 
-  private clients: Map<string, string> = new Map();
-
   handleConnection(client: Socket) {
-    console.log('client', client);
-    console.log(`Client connected: ${client.id}`);
+    const userId = client.handshake.query.userId as string;
+    if (userId) {
+      client.join(userId);
+      console.log(`Client ${client.id} connected and joined room for userId: ${userId}`);
+    } else {
+      console.log(`Client connected: ${client.id}`);
+    }
   }
 
   handleDisconnect(client: Socket) {
@@ -36,7 +39,7 @@ export class WebsocketGateway
 
   // Example: receive a message from client
   @SubscribeMessage('sendNotification')
-  handleSendNotification(@MessageBody() data: { message: string }) {
+  handleSendNotification(@MessageBody() data: {id : string, title : string, ts: number, message: string, read: boolean }) {
     console.log('Notification received:', data);
     // Broadcast to all connected clients
     this.server.emit('receiveNotification', data);
@@ -57,5 +60,3 @@ export class WebsocketGateway
     this.server.emit('receiveNotification', { message });
   }
 }
-
-

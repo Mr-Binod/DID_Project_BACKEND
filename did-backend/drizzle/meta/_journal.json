@@ -176,6 +176,13 @@
       "when": 1757743908299,
       "tag": "0025_easy_jasper_sitwell",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1757846496792,
+      "tag": "0026_solid_famine",
+      "breakpoints": true
     }
   ]
 }
