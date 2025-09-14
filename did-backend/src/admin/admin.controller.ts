@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
@@ -9,12 +9,16 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import multer from 'multer';
 import path from 'path';
 import * as bcrypt from 'bcrypt';
+import type { Response, Request } from 'express';
+import { ConfigService } from '@nestjs/config';
+import * as jwt from 'jsonwebtoken';
 
 @Controller('admin')
 export class AdminController {
   constructor(
     private readonly didService: DidService,
-    private readonly adminService: AdminService
+    private readonly adminService: AdminService,
+    private readonly configService: ConfigService
   ) {}
 
   @Post()
@@ -46,11 +50,23 @@ export class AdminController {
   }
 
   @Post('login')
-  async login(@Body() _data : {userId : string, password : string}) {
+  async login(@Res({passthrough : true}) res: Response, @Body() _data : {userId : string, password : string}) {
 	  const data = await this.adminService.findOne(_data.userId)
-	  if(data.state !== 200 ) return {state : 403, message : '아이디가 일지하지 않습니다'}
+	  const jwtSecretKey: string = this.configService.get<string>('JWT_SECRET_KEY') as string;
+	  if(data.state !== 200 ) return {state : 403, message : '아이디와 비밀번호가 일치하지  않습니다'}
 	  const verifypwd = await bcrypt.compare(_data.password, data.data![0].password)
-	  if(!verifypwd) return ({state : 403, message : '비밀번호가  일지하지 않습니다'})
+	  if(!verifypwd) return ({state : 403, message : '아이디와 비밀번호가 일치하지 않습니다'})
+
+	const token = jwt.sign(data, jwtSecretKey, {expiresIn : '1d'})
+		res.cookie('login_access_token', token, {
+      		httpOnly: true,
+      		secure: true, // HTTPS 필수
+      		sameSite: 'none', // cross-site 허용
+      		domain: '.sealiumback.store', // 모든 서브도메인에서 공유
+      		maxAge: 10 * 60 * 60 * 1000,
+    	});
+	
+
 	  return({state : 200, message : '로그인 성공했습니다', data})
   }
 
@@ -118,14 +134,39 @@ export class AdminController {
           "utf8"
         );
         const parsed = path.parse(safeName);
-        cb(null, `${parsed.name}_${Date.now()}${parsed.ext}`);
+        cb(null, `${parsed.name.slice(0,15)}_${Date.now()}${parsed.ext}`);
       },
       }),
       limits: { fileSize: 100 * 1024 * 1024 },
     }))
-  update(@UploadedFile() file: Express.Multer.File ,@Param('id') id: string, @Body() updateAdminDto: UpdateAdminDto) {
+async  update(@UploadedFile() file: Express.Multer.File ,
+	      @Res({ passthrough: true }) res: Response,
+	      @Param('id') id: string, @Body() updateAdminDto: UpdateAdminDto) {
+	  const jwtSecretKey: string = this.configService.get<string>('JWT_SECRET_KEY') as string; 
+
 	  updateAdminDto.imgPath = `https://api.sealiumback.store/uploads/${file.filename}`;
-    return this.adminService.update(id, updateAdminDto);
+	  const response = await this.adminService.update(id, updateAdminDto);
+	 console.log(response, ' admin response')
+	  if(response.data) {
+		  const token = jwt.sign(response.data[0], jwtSecretKey, {expiresIn : '1d'})
+		  await res.clearCookie('login_access_token', {
+		   httpOnly: true,
+		  secure: true,
+		  sameSite: 'none',
+		  domain: '.sealiumback.store',
+		  path: '/',
+	   })
+		await res.cookie('login_access_token', token, {
+      		httpOnly: true,
+      		secure: true, // HTTPS 필수
+      		sameSite: 'none', // cross-site 허용
+      		domain: '.sealiumback.store', // 모든 서브도메인에서 공유
+      		maxAge: 10 * 60 * 60 * 1000,
+    	}); 	
+		return response}
+	return response
+
+
   }
 
   @Delete(':id')

@@ -67,13 +67,14 @@ export class AdminService {
   }
 async  update(id : string, updateAdminDto: UpdateAdminDto) {
 	try{	 
-       	const data = await this.db.update(schema.admin).set(updateAdminDto).where(eq(schema.admin.userId, id))
-    	return {status : 200, message : 'admin info update successful'}
+       	const data = await this.db.update(schema.admin).set(updateAdminDto).where(eq(schema.admin.userId, id)).returning()
+	console.log(data, 'updated data')
+    	return {status : 200, message : 'admin info update successful', data}
 	}catch {
 		return {status : 402, message : 'admin info update failed'}
   }
 
-
+}
   async pendingAdmins(){
 	const items = await this.db.select().from(schema.admin_request)
 	return {state : 200, message : 'pending admins request successful', data : items}

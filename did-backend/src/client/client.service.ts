@@ -46,9 +46,9 @@ export class ClientService {
   }
 
 
-  async certRevokeReject(id : string, certname : string) {
+  async certRevokeReject(msg : string, id : string, certname : string) {
 	  const now = new Date();
-  	await this.db.update(schema.vc_request_logs).set({status : 'rejected', updatedAt : now}).where(and(eq(schema.vc_request_logs.userId, id),eq(schema.vc_request_logs.certificateName, certname)))
+  	await this.db.update(schema.vc_request_logs).set({rejectmsg : msg, status : 'rejected', updatedAt : now}).where(and(eq(schema.vc_request_logs.userId, id),eq(schema.vc_request_logs.certificateName, certname)))
        return {state : 200, message : 'certrevokereject successful'}	
   }
 
@@ -59,9 +59,9 @@ export class ClientService {
 	await this.didService.removeVc(id, certname);
        return {state : 200, message : 'certApproveReject successful'}
   }
-  async certRejectIssue(id : string, certname : string) {
+  async certIssueReject(msg : string, id : string, certname : string) {
 	  const now = new Date()
-	              await this.db.update(schema.vc_request_logs).set({updatedAt : now , status : 'rejected'}).where(and(eq(schema.vc_request_logs.userId, id),eq(schema.vc_request_logs.certificateName, certname)))
+	              await this.db.update(schema.vc_request_logs).set({updatedAt : now , status : 'rejected', rejectmsg : msg}).where(and(eq(schema.vc_request_logs.userId, id),eq(schema.vc_request_logs.certificateName, certname)))
        return {state : 200, message : 'certApproveReject successful'}
   }
 
@@ -101,8 +101,8 @@ export class ClientService {
 
   async updateUserInfo(id: string, updateClientDto: UpdateClientDto) {
 	  try{
-	  const data = await this.db.update(schema.user).set(updateClientDto).where(eq(schema.user.userId , id))
-    		return {state  :200, message : 'update successful'}
+	  const data = await this.db.update(schema.user).set(updateClientDto).where(eq(schema.user.userId , id)).returning()
+    		return {state  :200, message : 'update successful', data}
 	  } catch {
 		  return {state : 405, message : 'update error'}
 	  }

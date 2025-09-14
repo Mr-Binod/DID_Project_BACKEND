@@ -75,6 +75,7 @@ export const vc_request_logs = pgTable('vc_request_logs', {
   status : varchar('status', {length: 255}).notNull().default('pending'),
   ImagePath :  varchar('ImagePath', {length: 255}).notNull(),
   DOB :  varchar('DOB', {length: 255}).notNull(),
+  rejectmsg: varchar('rejectmsg', {length : 300}),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 })

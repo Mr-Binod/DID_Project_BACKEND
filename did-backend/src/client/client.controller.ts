@@ -153,8 +153,8 @@ export class ClientController {
   }
 
   @Patch('rejectrevoke')
-  certRevokeReject(@Body()data : { userId : string, certName : string}){
-	  return this.clientService.certRevokeReject(data.userId, data.certName)
+  certRevokeReject(@Body()data : { userId : string, certName : string, msg : string}){
+	  return this.clientService.certRevokeReject(data.userId, data.certName, data.msg)
   }
 
     @Patch('approverevoke')
@@ -164,9 +164,9 @@ export class ClientController {
   }
 
     @Patch('rejectissue')
-  certRejectIssue(@Body() data : {userId : string, certName : string}){
-	
-          return this.clientService.certRejectIssue(data.userId, data.certName)
+  certIssueReject(@Body() data : {userId : string, certName : string, msg : string}){
+	  	
+          return this.clientService.certIssueReject(data.userId, data.certName, data.msg)
   }
   
 
@@ -185,15 +185,35 @@ export class ClientController {
         "utf8"
       );
       const parsed = path.parse(safeName);
-      cb(null, `${parsed.name}_${Date.now()}${parsed.ext}`);
+      cb(null, `${parsed.name.slice(0, 15)}_${Date.now()}${parsed.ext}`);
     },
     }),
     limits: { fileSize: 100 * 1024 * 1024 },
   }))
-  updateUserInfo(@UploadedFile() file: Express.Multer.File,
-	  @Param('id') id: string, @Body() updateClientDto: UpdateClientDto) {
+async  updateUserInfo(@UploadedFile() file: Express.Multer.File,
+		      @Res({ passthrough: true }) res: Response,
+		      @Param('id') id: string, @Body() updateClientDto: UpdateClientDto) {
+	const jwtSecretKey: string = this.configService.get<string>('JWT_SECRET_KEY') as string;
 	updateClientDto.imgPath =  `https://api.sealiumback.store/uploads/${file.filename}`;
-    return this.clientService.updateUserInfo(id,  updateClientDto);
+    	const response = await this.clientService.updateUserInfo(id,  updateClientDto);
+	console.log(response.data, 'patch response client')
+
+	if(response.data) {
+		const token = jwt.sign(response.data[0], jwtSecretKey, {expiresIn : '1d'})
+		  res.clearCookie('login_access_token', {
+		   path: '/',
+		  domain: '.sealiumback.store'
+	   })
+			res.cookie('login_access_token', token, {
+      		httpOnly: true,
+      		secure: true, // HTTPS 필수
+      		sameSite: 'none', // cross-site 허용
+      		domain: '.sealiumback.store', // 모든 서브도메인에서 공유
+      		maxAge: 10 * 60 * 60 * 1000,
+    	}); 
+		return response
+	}
+	return response
   }
 
   @Delete(':id')

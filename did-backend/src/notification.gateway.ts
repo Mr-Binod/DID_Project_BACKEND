@@ -9,7 +9,13 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-
+@WebSocketGateway({
+  cors: {
+    origin: ["https://sealiumback.store", "http://localhost:3000"], // or "*" while testing
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+})
 
 export class NotificationsGateway
   implements OnGatewayConnection, OnGatewayDisconnect
