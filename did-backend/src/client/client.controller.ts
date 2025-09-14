@@ -75,13 +75,13 @@ export class ClientController {
    }
 
    @Get('logout')
+   @Redirect()
    userLogout(@Res({ passthrough: true }) res: Response) {
-	   res.clearCookie('admin_access_token', {
+	   res.clearCookie('login_access_token', {
 		   path: '/',
-		  domain: '.sealiumback.store',
-      sameSite: 'none'
+		  domain: '.sealiumback.store'
 	   })
-     return { state : 200, message : 'client logout successful'}
+	   return {url : 'https://sealiumback.store'}
    }
 
    @Get('oauth')
