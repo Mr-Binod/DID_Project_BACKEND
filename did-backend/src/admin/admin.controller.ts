@@ -94,7 +94,6 @@ export class AdminController {
   }
 
   @Get('logout')
-  @Redirect()
   userLogout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('admin_access_token', {
       path: '/',

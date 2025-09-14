@@ -75,7 +75,6 @@ export class ClientController {
    }
 
    @Get('logout')
-   @Redirect()
    userLogout(@Res({ passthrough: true }) res: Response) {
 	   res.clearCookie('login_access_token', {
 		   path: '/',
