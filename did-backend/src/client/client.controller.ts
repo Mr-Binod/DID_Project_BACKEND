@@ -76,7 +76,7 @@ export class ClientController {
 
    @Get('logout')
    userLogout(@Res({ passthrough: true }) res: Response) {
-	   res.clearCookie('login_access_token', {
+	   res.clearCookie('admin_access_token', {
 		   path: '/',
 		  domain: '.sealiumback.store'
 	   })
