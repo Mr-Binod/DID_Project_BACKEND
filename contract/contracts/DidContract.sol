@@ -15,13 +15,10 @@ contract DidContract is Ownable {
     
     constructor() Ownable(msg.sender) {}
 
-    function setWalletData(address _address, string memory _HashData) public onlyOwner {
+    function setWalletData(address _address, string memory _didaddress, string memory _HashData) public onlyOwner {
         WalletData[_address] = _HashData;
-        emit EventSetWalletData(_address, _HashData);
-    }
-
-    function setDidData(string memory _didaddress, string memory _HashData) public onlyOwner {
         DidData[_didaddress] = _HashData;
+        emit EventSetWalletData(_address, _HashData);
         emit EventSetDidData(_didaddress, _HashData);
     }
 
