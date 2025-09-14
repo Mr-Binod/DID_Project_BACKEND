@@ -97,7 +97,8 @@ export class AdminController {
   userLogout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('admin_access_token', {
       path: '/',
-      domain: '.sealiumback.store'
+      domain: '.sealiumback.store',
+      sameSite: 'none'
     })
     return { state : 200, message : 'admin logout successful'}
   }
