@@ -46,9 +46,9 @@ export class ClientService {
   }
 
 
-  async certRevokeReject(msg : string, id : string, certname : string) {
+  async certRevokeReject( id : string, certname : string) {
 	  const now = new Date();
-  	await this.db.update(schema.vc_request_logs).set({rejectmsg : msg, status : 'rejected', updatedAt : now}).where(and(eq(schema.vc_request_logs.userId, id),eq(schema.vc_request_logs.certificateName, certname)))
+  	await this.db.update(schema.vc_request_logs).set({ status : 'rejected', updatedAt : now}).where(and(eq(schema.vc_request_logs.userId, id),eq(schema.vc_request_logs.certificateName, certname)))
        return {state : 200, message : 'certrevokereject successful'}	
   }
 
@@ -59,9 +59,9 @@ export class ClientService {
 	await this.didService.removeVc(id, certname);
        return {state : 200, message : 'certApproveReject successful'}
   }
-  async certIssueReject(msg : string, id : string, certname : string) {
+  async certIssueReject(id : string, certname : string) {
 	  const now = new Date()
-	              await this.db.update(schema.vc_request_logs).set({updatedAt : now , status : 'rejected', rejectmsg : msg}).where(and(eq(schema.vc_request_logs.userId, id),eq(schema.vc_request_logs.certificateName, certname)))
+	              await this.db.update(schema.vc_request_logs).set({updatedAt : now , status : 'rejected'}).where(and(eq(schema.vc_request_logs.userId, id),eq(schema.vc_request_logs.certificateName, certname)))
        return {state : 200, message : 'certApproveReject successful'}
   }
 

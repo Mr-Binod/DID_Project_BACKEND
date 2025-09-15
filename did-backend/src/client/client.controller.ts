@@ -151,8 +151,8 @@ export class ClientController {
   }
 
   @Patch('rejectrevoke')
-  certRevokeReject(@Body()data : { userId : string, certName : string, msg : string}){
-	  return this.clientService.certRevokeReject(data.userId, data.certName, data.msg)
+  certRevokeReject(@Body()data : { userId : string, certName : string}){
+	  return this.clientService.certRevokeReject(data.userId, data.certName)
   }
 
     @Patch('approverevoke')
@@ -162,9 +162,9 @@ export class ClientController {
   }
 
     @Patch('rejectissue')
-  certIssueReject(@Body() data : {userId : string, certName : string, msg : string}){
+  certIssueReject(@Body() data : {userId : string, certName : string}){
 	  	
-          return this.clientService.certIssueReject(data.userId, data.certName, data.msg)
+          return this.clientService.certIssueReject(data.userId, data.certName)
   }
   
 
