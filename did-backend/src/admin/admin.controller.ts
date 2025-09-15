@@ -94,13 +94,13 @@ export class AdminController {
   }
 
   @Get('logout')
-  @Redirect()
+  // @Redirect()
   userLogout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('admin_access_token', {
       path: '/',
       domain: '.sealiumback.store'
     })
-    return { url: 'https://admin.sealiumback.store' }
+    return {state : 200, message : 'admin logout successful'}
   }
 
   @Get('pendingadmins')
