@@ -54,18 +54,24 @@
 
 ## 화면 구성 
 ### desktop view
-<label >회원 가입 (블록에 기록 되기때문에 시간 좀 소요됩니다)</label> </br> 
-<video src="./did-backend/uploads/adminsignup.mp4" autoPlay></video><br/><br/>
-<label>NFT 생성</label></br>
-<video src="./did-backend/uploads/clientsealium.mp4" autoPlay></video> <br/><br/>
-<label>NFT 생성</label></br>
-<video src="./did-backend/uploads/verify.mp4" autoPlay></video><br/><br/>
-
-
+<label >관리자 페이지</label> </br> 
+<a href="./did-backend/uploads/adminsignup.mp4" target="_blank">
+  <img src="https://github.com/Mr-Binod/sealium/assets/107462963/98642353-d1b4-4c4f-9556-324329241517" alt="관리자 페이지 데모" width="800"/>
+</a>
+<br/><br/>
+<label>클라이언트 페이지지</label></br>
+<a href="./did-backend/uploads/clientsealium.mp4" target="_blank">
+  <img src="path/to/your/client-thumbnail.png" alt="클라이언트 페이지 데모" width="800"/>
+</a>
+<br/><br/>
+<label>검증 페이지</label></br>
+<a href="./did-backend/uploads/verify.mp4" target="_blank">
+  <img src="path/to/your/verify-thumbnail.png" alt="검증 페이지 데모" width="800"/>
+</a>
+<br/><br/>
 
 ## 주요 기능
 
-- 관리자의 등급은 슈퍼관리자 와 일반관리자, 슈퍼 관리자는 하드 고딩으로 생성 일반 관리자는 회원가입하고 슈퍼관리자가 요청 수락한후 로그인 가능
 
 - 관리자 요청 및 관리 권한는 슈펴 관리자만 가능
 
