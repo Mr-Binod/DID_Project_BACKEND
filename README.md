@@ -1,7 +1,7 @@
 
 
-# ZunoNFT
-<h2><a href="https://admin.sealiumback.store" style="color: lightblue;">ZunoNFT 사이트 이동</a></h2>
+# Sealium
+<h2><a href="https://admin.sealiumback.store" style="color: lightblue;">Sealium 사이트 이동</a></h2>
 
 # 목차
 - [프로젝트 소개](#프로젝트-소개)
@@ -55,17 +55,11 @@
 ## 화면 구성 
 ### desktop view
 <label >회원 가입 (블록에 기록 되기때문에 시간 좀 소요됩니다)</label> </br> 
-<img src="./src/images/desktopview.gif"><br><br>
+<video src="./did-backend/uploads/adminsignup.mp4" autoPlay></video><br/><br/>
 <label>NFT 생성</label></br>
-<img src="./src/images/mintdesktop.gif"></br></br>
-
-### mobile view
-<label>NFT 판매</label></br>
-<img src="./src/images/mobileLogin.gif"><br><br>
-<label>NFT 구매</label></br>
-<img src="./src/images/mobilePages.gif"></br>
-<label>NFT 구매</label></br>
-<img src="./src/images/mint.gif"></br>
+<video src="./did-backend/uploads/clientsealium.mp4" autoPlay></video> <br/><br/>
+<label>NFT 생성</label></br>
+<video src="./did-backend/uploads/verify.mp4" autoPlay></video><br/><br/>
 
 
 
